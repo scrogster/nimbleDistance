@@ -1,6 +1,6 @@
 Package: nimbleDistance
 Title: Functions to Fit Bayesian Distance Sampling Models using Nimble
-Version: 0.0.0.9000
+Version: 0.0.1
 Authors@R: 
     person(given = "Michael",
            family = "Scroggie",
@@ -10,6 +10,12 @@ Authors@R:
 Description: Functions for Bayesian distance sampling models for use within nimble.
 License: GPL-3
 Encoding: UTF-8
+Depends: R (>= 3.4.0), nimble, gsl
 LazyData: true
+URL: https://github.com/scrogster/nimbleDistance
+Collate:
+  dHR.R
+  dHN.R
+  nimble_functions.R
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.0.0
+RoxygenNote: 7.1.1
