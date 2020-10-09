@@ -4,6 +4,8 @@
 \alias{dHR}
 \alias{integralHR}
 \alias{dHR_V}
+\alias{rHR}
+\alias{rHR_V}
 \title{Hazard rate distribution for use in \code{nimble} models}
 \usage{
 integralHR(b = 5, sigma = 30, Xmin, Xmax)
@@ -29,6 +31,8 @@ distributions that can be used directly from R or in \code{nimble}
 models.
 }
 \examples{
+
+#direct invocation of functions from R to evaluate the likelihood
 dHR(x=20, b=1, sigma=40, Xmax=100, exactint = 0)
 dHR(x=20, b=1, sigma=40, Xmax=100, exactint = 1)
 
@@ -36,6 +40,44 @@ dHR(x=20, b=1, sigma=40, Xmax=100, exactint = 1)
 #vectorized versions
 dHR_V(x=c(20, 10), b=1, sigma=40, Xmax=100, exactint = 0)
 dHR_V(x=c(20, 10), b=1, sigma=40, Xmax=100, exactint = 1)
+
+N=500
+true_y<-runif(N, 0, 100)
+#hazard rate truth
+sigma_true<-40
+b_true<- 5
+#detection
+p_detect<- 1-exp(-(true_y/sigma_true)^(-b_true))
+plot(p_detect~true_y, type="p")
+detect<-rbinom(N, 1, p_detect)
+#observations
+y<-true_y[detect==1]
+nind<-length(y)
+hist(y, breaks=20)
+distCodeV<-nimbleCode({
+y[1:nind]~dHR_V(b, sigma, 100)
+sigma~dunif(10, 70)
+b~dunif(2, 20)
+p_mean<-RintegralHR(b, sigma, 0, 100)/100
+})
+#inits and monitors
+inits <- function() list(sigma=50, b=5)
+params <- c("sigma", "b")
+
+#generate some MCMC samples
+samples <- nimbleMCMC(
+code = distCodeV,
+constants = list(y=y, nind=nind), ## the distance data
+inits = inits,
+monitors = params,
+niter = 10000,
+nburnin = 5000)
+
+layout(matrix(1:2, nrow=2))
+hist(samples[,"sigma"], col="red", breaks=50, xlab="sigma")
+abline(v=sigma_true, col="blue", lwd=2); mtext(side=1, at=sigma_true, text="Truth")
+hist(samples[,"b"], col="red", xlab="b", breaks=50)
+abline(v=b_true, col="blue", lwd=2); mtext(side=1, at=b_true, text="Truth")
 }
 \author{
 Michael Scroggie
