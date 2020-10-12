@@ -10,7 +10,7 @@ Authors@R:
 Description: Functions for Bayesian distance sampling models for use within nimble.
 License: GPL-3
 Encoding: UTF-8
-Depends: R (>= 3.4.0), nimble, gsl
+Depends: R (>= 3.4.0), nimble
 LazyData: true
 URL: https://github.com/scrogster/nimbleDistance
 Collate:

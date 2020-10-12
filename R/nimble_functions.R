@@ -9,11 +9,13 @@
 
 	registerDistributions(list(
 		dHR = list(BUGSdist="dHR(b, sigma, Xmax)",
+							 Rdist = "dHR(b, sigma, Xmax)",
 								 pqAvail = FALSE,
 								 range = c(0, Inf))), verbose=FALSE)
 
 	registerDistributions(list(
 		dHR_V = list(BUGSdist="dHR_V(b, sigma, Xmax)",
+								 BUGSdist="rHR_V(b, sigma, Xmax)",
 									pqAvail = FALSE,
 									types = c('value = double(1)', 'b = double(0)', 'sigma = double(0)', 'Xmax = double(0)'),
 									range = c(0, Inf))), verbose=FALSE)
