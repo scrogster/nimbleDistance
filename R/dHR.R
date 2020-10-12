@@ -2,7 +2,7 @@
 #'
 #' \code{dHR} and \code{dHR_V} provide hazard-rate detection
 #' distributions that can be used directly from R or in \code{nimble}
-#' models.
+#' models. \code{integralHR} provides the integral for the hazard-rate likelihood with specified parameters.
 #'
 #' @aliases dHR dHR_V rHR rHR_V
 #'
@@ -10,7 +10,8 @@
 #' @param x distance data. either a single value (dHR) or a vector of values (dHR_V)
 #' @param b shape of the hazard rate function
 #' @param sigma scale of the hazard rate function
-#' @param Xmax truncation distance for integration of the likelihood function
+#' @param Xmax right truncation distance for integration of the likelihood function
+#' @param Xmin left truncation distance for integration of the likelihood function
 #' @param log if TRUE, return the log-likelihood
 #'
 #' @author Michael Scroggie
@@ -19,13 +20,8 @@
 #' @examples
 #'
 #' #direct invocation of functions from R to evaluate the likelihood
-#' dHR(x=20, b=1, sigma=40, Xmax=100, exactint = 0)
-#' dHR(x=20, b=1, sigma=40, Xmax=100, exactint = 1)
-#'
-#'
-#' #vectorized versions
-#' dHR_V(x=c(20, 10), b=1, sigma=40, Xmax=100, exactint = 0)
-#' dHR_V(x=c(20, 10), b=1, sigma=40, Xmax=100, exactint = 1)
+#' dHR(x=20, b=1, sigma=40, Xmax=100)
+#' dHR(x=20, b=1, sigma=40, Xmax=100)
 #'
 #'N=500
 #'true_y<-runif(N, 0, 100)
@@ -54,7 +50,7 @@
 #'  })
 #'#inits and monitors
 #'inits <- function() list(sigma=50, b=5)
-#'params <- c("sigma", "b", "p_mean)
+#'params <- c("sigma", "b", "p_mean")
 #'
 #'#generate some MCMC samples
 #'samples <- nimbleMCMC(
@@ -70,7 +66,7 @@
 #'abline(v=sigma_true, col="blue", lwd=2)
 #'hist(samples[,"b"], col="red", xlab="b")
 #'abline(v=b_true, col="blue", lwd=2)
-#'hist(samples[,"p_mean"], col="red", xlab="b", xlim=c(0, 1))
+#'hist(samples[,"p_mean"], col="red", xlab="p_mean", xlim=c(0, 1))
 #'abline(v=RintegralHR(b_true, sigma_true, 0, 100)/100, col="blue", lwd=2)
 
 #helper functions for computing the integrals of the Hazard Rate distance function
@@ -110,7 +106,9 @@ rHR<- nimbleFunction(
 								 sigma = double(0),
 								 Xmax  = double(0, default=100)) {
 		returnType(double(0))
-		return(0)
+		xrand<-runif(1, 0, Xmax)
+		p <- 1-exp(-(xrand/sigma)^(-b))
+		return(rbinom(1, 1, p))
 	}
 )
 
@@ -140,8 +138,10 @@ rHR_V<- nimbleFunction(
 								 b = double(0),
 								 sigma = double(0),
 								 Xmax  = double(0, default=100)) {
-		returnType(double())
-		return(0)
+		returnType(double(0))
+		xrand<-runif(1, 0, Xmax)
+		p <- 1-exp(-(xrand/sigma)^(-b))
+		return(rbinom(1, 1, p))
 	}
 )
 

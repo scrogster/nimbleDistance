@@ -19,7 +19,9 @@ rHR(n, b, sigma, Xmax = 100)
 
 \item{sigma}{scale of the hazard rate function}
 
-\item{Xmax}{truncation distance for integration of the likelihood function}
+\item{Xmin}{left truncation distance for integration of the likelihood function}
+
+\item{Xmax}{right truncation distance for integration of the likelihood function}
 
 \item{x}{distance data. either a single value (dHR) or a vector of values (dHR_V)}
 
@@ -28,7 +30,59 @@ rHR(n, b, sigma, Xmax = 100)
 \description{
 \code{dHR} and \code{dHR_V} provide hazard-rate detection
 distributions that can be used directly from R or in \code{nimble}
-models.
+models. \code{integralHR} provides the integral for the hazard-rate likelihood with specified parameters.
+}
+\examples{
+
+#direct invocation of functions from R to evaluate the likelihood
+dHR(x=20, b=1, sigma=40, Xmax=100)
+dHR(x=20, b=1, sigma=40, Xmax=100)
+
+N=500
+true_y<-runif(N, 0, 100)
+#hazard rate truth
+sigma_true<-40
+b_true<- 5
+#detection
+p_detect<- 1-exp(-(true_y/sigma_true)^(-b_true))
+plot(p_detect~true_y, type="p")
+detect<-rbinom(N, 1, p_detect)
+#observations
+y<-true_y[detect==1]
+nind<-length(y)
+hist(y, breaks=20)
+distCodeV<-nimbleCode({
+y[1:nind]~dHR_V(b, sigma, 100)
+sigma~dunif(10, 70)
+b~dunif(2, 20)
+p_mean<-RintegralHR(b, sigma, 0, 100)/100
+})
+distCodeV<-nimbleCode({
+ y[]~dHR_V(b, sigma, 100)
+ sigma~dunif(10, 70)
+ b~dunif(2, 20)
+ p_mean<-RintegralHR(b, sigma, 0, 100)/100
+ })
+#inits and monitors
+inits <- function() list(sigma=50, b=5)
+params <- c("sigma", "b", "p_mean")
+
+#generate some MCMC samples
+samples <- nimbleMCMC(
+code = distCodeV,
+constants = list(y=y, nind=nind), ## the distance data
+inits = inits,
+monitors = params,
+niter = 1000,
+nburnin = 500)
+
+layout(matrix(1:3, nrow=3))
+hist(samples[,"sigma"], col="red", xlab="sigma")
+abline(v=sigma_true, col="blue", lwd=2)
+hist(samples[,"b"], col="red", xlab="b")
+abline(v=b_true, col="blue", lwd=2)
+hist(samples[,"p_mean"], col="red", xlab="p_mean", xlim=c(0, 1))
+abline(v=RintegralHR(b_true, sigma_true, 0, 100)/100, col="blue", lwd=2)
 }
 \author{
 Michael Scroggie
