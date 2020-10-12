@@ -38,7 +38,7 @@ from the corresponding distance-detection distribution.
 dHN(x=20,  sigma=40, Xmax=100)
 dHN(x=20,  sigma=40, Xmax=100)
 
-N=500
+N=1000
 true_y<-runif(N, 0, 100)
 #hazard rate truth
 sigma_true<-40
@@ -51,7 +51,7 @@ y<-true_y[detect==1]
 nind<-length(y)
 hist(y, breaks=20)
 distCodeV<-nimbleCode({
- y[]~dHN_V(sigma, 100)
+ y[1:nind]~dHN_V(sigma, 100)
  sigma~dunif(10, 70)
  })
 #inits and monitors
@@ -64,14 +64,13 @@ code = distCodeV,
 constants = list(y=y, nind=nind), ## the distance data
 inits = inits,
 monitors = params,
-niter = 1000,
-nburnin = 500)
+niter = 2000,
+nburnin = 1000)
 
-layout(matrix(1:3, nrow=3))
-hist(samples[,"sigma"], col="red", xlab="sigma")
-abline(v=sigma_true, col="blue", lwd=2)
-hist(samples[,"p_mean"], col="red", xlab="p_mean", xlim=c(0, 1))
-abline(v=RintegralHR(b_true, sigma_true, 0, 100)/100, col="blue", lwd=2)
+layout(matrix(1:2, nrow=2))
+hist(y, freq=FALSE)
+lines(x=1:100, y=dHN(1:100, mean(samples[,"sigma"])), col="red")
+hist(samples[,"sigma"], col="red")
 }
 \author{
 Michael Scroggie

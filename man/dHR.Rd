@@ -58,12 +58,6 @@ y<-true_y[detect==1]
 nind<-length(y)
 hist(y, breaks=20)
 distCodeV<-nimbleCode({
-y[1:nind]~dHR_V(b, sigma, 100)
-sigma~dunif(10, 70)
-b~dunif(2, 20)
-p_mean<-RintegralHR(b, sigma, 0, 100)/100
-})
-distCodeV<-nimbleCode({
  y[]~dHR_V(b, sigma, 100)
  sigma~dunif(10, 70)
  b~dunif(2, 20)
@@ -87,8 +81,8 @@ hist(samples[,"sigma"], col="red", xlab="sigma")
 abline(v=sigma_true, col="blue", lwd=2)
 hist(samples[,"b"], col="red", xlab="b")
 abline(v=b_true, col="blue", lwd=2)
-hist(samples[,"p_mean"], col="red", xlab="p_mean", xlim=c(0, 1))
-abline(v=RintegralHR(b_true, sigma_true, 0, 100)/100, col="blue", lwd=2)
+hist(y, freq=FALSE)
+lines(x=1:100, y=dHR(1:100, mean(samples[,"b"])), mean(samples[,"sigma"])), col="red")
 }
 \author{
 Michael Scroggie
