@@ -2,7 +2,9 @@
 #'
 #' \code{dHR} and \code{dHR_V} provide hazard-rate detection
 #' distributions that can be used directly from R or in \code{nimble}
-#' models. \code{integralHR} provides the integral for the hazard-rate likelihood with specified parameters.
+#' models. The corresponding randomisation routines \code{rHR} and \code{rHR_V} generate random distances
+#' from the corresponding hazard-rate distribution.
+#' \code{integralHR} is a helper function for computing the integral for the hazard-rate function with the specified parameters.
 #'
 #' @aliases dHR dHR_V rHR rHR_V
 #'
@@ -36,12 +38,6 @@
 #'y<-true_y[detect==1]
 #'nind<-length(y)
 #'hist(y, breaks=20)
-#'distCodeV<-nimbleCode({
-#'	y[1:nind]~dHR_V(b, sigma, 100)
-#'	sigma~dunif(10, 70)
-#'	b~dunif(2, 20)
-#'	p_mean<-RintegralHR(b, sigma, 0, 100)/100
-#'	})
 #'	distCodeV<-nimbleCode({
 #'  y[]~dHR_V(b, sigma, 100)
 #'  sigma~dunif(10, 70)
@@ -66,8 +62,8 @@
 #'abline(v=sigma_true, col="blue", lwd=2)
 #'hist(samples[,"b"], col="red", xlab="b")
 #'abline(v=b_true, col="blue", lwd=2)
-#'hist(samples[,"p_mean"], col="red", xlab="p_mean", xlim=c(0, 1))
-#'abline(v=RintegralHR(b_true, sigma_true, 0, 100)/100, col="blue", lwd=2)
+#'hist(y, freq=FALSE)
+#'lines(x=1:100, y=dHR(1:100, mean(samples[,"b"])), mean(samples[,"sigma"])), col="red")
 
 #helper functions for computing the integrals of the Hazard Rate distance function
 #' @export
@@ -106,15 +102,20 @@ rHR<- nimbleFunction(
 								 sigma = double(0),
 								 Xmax  = double(0, default=100)) {
 		returnType(double(0))
+		k<-0
+		while(k==0){
 		xrand<-runif(1, 0, Xmax)
 		p <- 1-exp(-(xrand/sigma)^(-b))
-		return(rbinom(1, 1, p))
+		k=rbinom(1, 1, p)
+		}
+		return(xrand)
 	}
 )
 
 #########################################################################################
 #vectorized versions of dHR computes likelihood for a set of distances with common parameters
 # much faster
+#' @rdname dHR
 #' @export
 dHR_V <- nimbleFunction(
 	run = function(x = double(1),
@@ -132,6 +133,7 @@ dHR_V <- nimbleFunction(
 		else return(exp(LL))
 	}
 )
+#' @rdname dHR
 #' @export
 rHR_V<- nimbleFunction(
 	run = function(n = integer(),
@@ -139,9 +141,13 @@ rHR_V<- nimbleFunction(
 								 sigma = double(0),
 								 Xmax  = double(0, default=100)) {
 		returnType(double(0))
-		xrand<-runif(1, 0, Xmax)
-		p <- 1-exp(-(xrand/sigma)^(-b))
-		return(rbinom(1, 1, p))
+		k<-0
+		while(k==0){
+			xrand<-runif(1, 0, Xmax)
+			p <- 1-exp(-(xrand/sigma)^(-b))
+			k=rbinom(1, 1, p)
+		}
+		return(xrand)
 	}
 )
 

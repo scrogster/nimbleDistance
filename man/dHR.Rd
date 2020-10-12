@@ -13,6 +13,10 @@ integralHR(b = 5, sigma = 30, Xmin, Xmax)
 dHR(x, b, sigma, Xmax = 100, log = 0)
 
 rHR(n, b, sigma, Xmax = 100)
+
+dHR_V(x, b, sigma, Xmax = 100, log = 0)
+
+rHR_V(n, b, sigma, Xmax = 100)
 }
 \arguments{
 \item{b}{shape of the hazard rate function}
@@ -30,7 +34,9 @@ rHR(n, b, sigma, Xmax = 100)
 \description{
 \code{dHR} and \code{dHR_V} provide hazard-rate detection
 distributions that can be used directly from R or in \code{nimble}
-models. \code{integralHR} provides the integral for the hazard-rate likelihood with specified parameters.
+models. The corresponding randomisation routines \code{rHR} and \code{rHR_V} generate random distances
+from the corresponding hazard-rate distribution.
+\code{integralHR} is a helper function for computing the integral for the hazard-rate function with the specified parameters.
 }
 \examples{
 
