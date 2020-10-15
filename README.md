@@ -1,10 +1,12 @@
-# Distributions for Distance Sampling models in 'nimble'
+<img src="inst/nimbleDistance.png" width="200">
+
+## nimbleDistance: functions for Distance Sampling models in [nimble](https://https://r-nimble.org/)
 
 This repository provides some user-defined distributions that can be used to implement distance sampling models in nimble
 
-* likelihoods for common distance-detection distributions including hazard-rate and half-normal
+* likelihoods for common distance-detection distributions hazard-rate and half-normal
 
-This is an experimental package in the early stages of development. Suggestions for improvement and contributions of code are very welcome.
+The package is at a very early stage of development. Suggestions for improvement and contributions of code are very welcome.
 
 ## Installation Instructions
 
