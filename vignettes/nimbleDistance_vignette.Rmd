@@ -1,0 +1,122 @@
+---
+title: "Bayesian analysis of distance sampling data using the nimbleDistance package"
+author: "Michael Scroggie"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{nimbleDistance}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Background
+
+The *nimbleDistance* package is intended to provide some basic functions for implementing distance-sampling analyses using *nimble* (de Valpine et al. 2017, 2020): a fast, extensible implementation of the BUGS language for analysing Bayesian statistical models. The package is at an early stage of development, and currently includes some functions for fitting half-normal and hazard-rate distance models to line-transect distance data. 
+
+This vignette demonstrate some simple distance sampling analyses using *nimbleDistance*, and compares the results with those obtained using equivalent distance-detection models in package *Distance* (Miller et al. 2019). As an example, we analyse some real line-transect data collected from a population of the winter wren *(Troglodytes troglodytes)* in Fife, Scotland, as originally described by Buckland et al. (2006), and compare the results obtained using *nimbleDistance* and *Distance*.
+
+## Analysis of the the wren data
+
+We begin by loading the required packages. The wren line-transect data are included in package *Distance*.
+
+```{r packages_and_data}
+library(Distance)
+library(mrds)
+library(nimbleDistance)
+data(wren_lt)
+```
+
+First, we fit simple half-normal and hazard-rate distance models to the wren data using maximum likelihood methods in package *Distance*.
+```{r simple_fit}
+wren.hn <- ds(data=wren_lt, key="hn", adjustment=NULL)
+wren.hr <- ds(data=wren_lt, key="hr", adjustment=NULL)
+```
+
+Plotting the fitted detection functions shows that the hazard-rate function fits somewhat better, reflecting the presence of a strong "shoulder" in the distribution of observed distances at approximately 75 meters from the transect line. 
+```{r plot_fits, fig.height=8, fig.width=5, fig.cap="Figure 1. Distance functions for the wren data fitted using package Distance"}
+layout(matrix(1:2, nrow=2))
+plot(wren.hn, main="Half-normal", las=1)
+plot(wren.hr, main="Hazard rate", las=1)
+```
+
+Next, we reproduce this very simple analysis using comparable Bayesian models implemented with the functions provided in the *nimbleDistance* package. Firstly, a half-normal function is fitted. The results show generally good agreement between the estimates of the scale parameter of the half normal function (sigma) and the fitted distance function agrees closely with that obtained using *Distance* above.
+
+```{r nimble_halfnormal, fig.height=8, fig.width=5, fig.cap="Figure 1. Half-normal distance function fitted to the wren data using nimbleDistance", cache=TRUE}
+y<-wren_lt$distance
+nind<-length(y)
+distCodeV<-nimbleCode({
+ y[1:nind]~dHN_V(sigma, 100)
+ sigma~dunif(0, 200)
+ })
+#inits and monitors
+inits <- function() list(sigma=50)
+params <- c("sigma")
+
+#generate some MCMC samples
+samples <- nimbleMCMC(
+code = distCodeV,
+constants = list(y=y, nind=nind), ## the distance data
+inits = inits,
+monitors = params,
+niter = 5000,
+nburnin = 1000)
+
+layout(matrix(1:2, nrow=2))
+hist(y, freq=FALSE, las=1, xlab="Distance (m)", main="")
+lines(x=1:100, y=dHN(1:100, mean(samples[,"sigma"])), col="red")
+hist(samples[,"sigma"], col="red", breaks=100, las=1, xlab=expression(paste(sigma)), main="")
+abline(v=exp(wren.hn$ddf$par), col="black", lwd=2) #Distance uses log-scale for parameters
+```
+
+Next, we fit the hazard-rate distance function to the wren data using *nimbleDistance* and compare the results with those obtained using *Distance*. Again, the estimates of the parameters (sigma and b) are in close agreement, and the fitted detection function closely resembles that obtained using *Distance*.
+
+```{r nimble_hazard, fig.height=12, fig.width=5, fig.cap="Figure 2. Hazard-rate distance function fitted to the wren data using nimbleDistance", cache=TRUE}
+y<-wren_lt$distance
+nind<-length(y)
+distCodeV<-nimbleCode({
+ y[]~dHR_V(b, sigma, 100)
+ sigma~dunif(1, 200)
+ b~dunif(2, 50)
+ })
+#inits and monitors
+inits <- function() list(sigma=50, b=5)
+params <- c("sigma", "b")
+
+#generate some MCMC samples
+samples <- nimbleMCMC(
+code = distCodeV,
+constants = list(y=y, nind=nind), ## the distance data
+inits = inits,
+monitors = params,
+niter = 5000,
+nburnin = 1000)
+
+par(mar=c(4,4, 2, 1))
+layout(matrix(1:3, nrow=3))
+hist(samples[,"sigma"], col="red", xlab="sigma", breaks=100)
+abline(v=exp(wren.hr$ddf$par)[2], col="blue", lwd=2)
+hist(samples[,"b"], col="red", xlab="b", breaks=100)
+abline(v=exp(wren.hr$ddf$par)[1], col="blue", lwd=2)
+hist(y, freq=FALSE)
+lines(x=1:100, y=dHR(1:100, mean(samples[,"b"]), mean(samples[,"sigma"])), col="red")
+```
+
+## References
+
+Buckland, S. T. (2006) Point-transect surveys for songbirds: robust methodologies. *The Auk* 123 (2): 345–357.
+
+de Valpine, P., D. Turek, C.J. Paciorek, C. Anderson-Bergman, D. Temple Lang, and R. Bodik. 2017. Programming with models: writing statistical algorithms for general model structures with NIMBLE. *Journal of Computational and Graphical Statistics* 26: 403-413.
+
+de Valpine P, Paciorek C, Turek D, Michaud N, Anderson-Bergman C, Obermeyer F, Wehrhahn Cortes C, Rodriguez A, Temple Lang D,
+Paganin S (2020). *NIMBLE: MCMC, Particle Filtering, and Programmable Hierarchical Modeling*. R package version 0.10.0
+
+Miller DL, Rexstad E, Thomas L, Marshall L, Laake JL (2019). Distance Sampling in R. *Journal of Statistical Software*,
+89(1), 1-28.
+
