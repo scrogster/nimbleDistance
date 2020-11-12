@@ -48,7 +48,7 @@ plot(wren.hr, main="Hazard rate", las=1)
 
 Next, we reproduce this very simple analysis using comparable Bayesian models implemented with the functions provided in the *nimbleDistance* package. Firstly, a half-normal function is fitted. The results show generally good agreement between the estimates of the scale parameter of the half normal function (sigma) and the fitted distance function agrees closely with that obtained using *Distance* above.
 
-```{r nimble_halfnormal, fig.height=8, fig.width=5, fig.cap="Figure 1. Half-normal distance function fitted to the wren data using nimbleDistance", cache=TRUE}
+```{r nimble_halfnormal, fig.height=8, fig.width=5, fig.cap="Figure 2. Half-normal distance function fitted to the wren data using nimbleDistance. The blue vertical line is the estimate of sigma from the analysis using Distance", cache=TRUE}
 y<-wren_lt$distance
 nind<-length(y)
 distCodeV<-nimbleCode({
@@ -68,16 +68,17 @@ monitors = params,
 niter = 5000,
 nburnin = 1000)
 
+par(mar=c(4,4, 2, 1))
 layout(matrix(1:2, nrow=2))
+hist(samples[,"sigma"], col="red", breaks=100, las=1, xlab=expression(paste(sigma)), main="")
+abline(v=exp(wren.hn$ddf$par), col="blue", lwd=2) #Distance uses log-scale for parameters
 hist(y, freq=FALSE, las=1, xlab="Distance (m)", main="")
 lines(x=1:100, y=dHN(1:100, mean(samples[,"sigma"])), col="red")
-hist(samples[,"sigma"], col="red", breaks=100, las=1, xlab=expression(paste(sigma)), main="")
-abline(v=exp(wren.hn$ddf$par), col="black", lwd=2) #Distance uses log-scale for parameters
 ```
 
 Next, we fit the hazard-rate distance function to the wren data using *nimbleDistance* and compare the results with those obtained using *Distance*. Again, the estimates of the parameters (sigma and b) are in close agreement, and the fitted detection function closely resembles that obtained using *Distance*.
 
-```{r nimble_hazard, fig.height=12, fig.width=5, fig.cap="Figure 2. Hazard-rate distance function fitted to the wren data using nimbleDistance", cache=TRUE}
+```{r nimble_hazard, fig.height=12, fig.width=5, fig.cap="Figure 3. Hazard-rate distance function fitted to the wren data using nimbleDistance. The blue vertical lines are the estimates of sigma and b from the analysis using Distance", cache=TRUE}
 y<-wren_lt$distance
 nind<-length(y)
 distCodeV<-nimbleCode({
@@ -100,11 +101,11 @@ nburnin = 1000)
 
 par(mar=c(4,4, 2, 1))
 layout(matrix(1:3, nrow=3))
-hist(samples[,"sigma"], col="red", xlab="sigma", breaks=100)
+hist(samples[,"sigma"], col="red", xlab="sigma", breaks=100, xlab=expression(paste(sigma)), main="")
 abline(v=exp(wren.hr$ddf$par)[2], col="blue", lwd=2)
-hist(samples[,"b"], col="red", xlab="b", breaks=100)
+hist(samples[,"b"], col="red", xlab="b", breaks=100, xlab="b", main="")
 abline(v=exp(wren.hr$ddf$par)[1], col="blue", lwd=2)
-hist(y, freq=FALSE)
+hist(y, freq=FALSE, main="")
 lines(x=1:100, y=dHR(1:100, mean(samples[,"b"]), mean(samples[,"sigma"])), col="red")
 ```
 
