@@ -1,5 +1,5 @@
 Package: nimbleDistance
-Title: Functions to Fit Bayesian Distance Sampling Models using Nimble
+Title: Functions to Fit Bayesian distance sampling models using nimble
 Version: 0.0.1
 Authors@R: 
     person(given = "Michael",
@@ -11,6 +11,7 @@ Description: Functions for Bayesian distance sampling models for use within nimb
 License: GPL-3
 Encoding: UTF-8
 Depends: R (>= 3.4.0), nimble
+Suggests: Distance, mrds
 LazyData: true
 URL: https://github.com/scrogster/nimbleDistance
 Collate:
