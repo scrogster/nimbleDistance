@@ -73,7 +73,7 @@ layout(matrix(1:4, nrow=2))
 hist(samples[,"sigma"], col="red", breaks=100, las=1, xlab=expression(paste(sigma)), main="", border=NA)
 abline(v=exp(wren.hn$ddf$par), col="blue", lwd=2) #Distance uses log-scale for parameters
 #traceplots
-plot(samples[,"sigma"], type="l", col="red", las=1, ylab="value")
+plot(samples[,"sigma"], type="l", col="red", las=1, ylab="value", xlab="iteration")
 #fitted distance function
 plot(wren.hn, lwd=2, las=1)
 lines(x=0:100, y=dHN(0:100, mean(samples[,"sigma"]))/
@@ -112,7 +112,7 @@ abline(v=exp(wren.hr$ddf$par)[2], col="blue", lwd=2)
 hist(samples[,"b"], col="red", xlab="b", breaks=100, main="", border=NA, las=1)
 abline(v=exp(wren.hr$ddf$par)[1], col="blue", lwd=2)
 #traceplots
-plot(samples[,"sigma"], type="l", ylim=c(0, 100), col="red", las=1)
+plot(samples[,"sigma"], type="l", ylim=c(0, 100), col="red", las=1, ylab="value", xlab="iteration")
 lines(samples[,"b"], col="red")
 #fitted distance function
 plot(wren.hr, lwd=2, las=1)
