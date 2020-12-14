@@ -12,6 +12,7 @@
 #' @param sigma scale of the half-normal distribution
 #' @param Xmax right truncation distance for integration of the likelihood function
 #' @param Xmin left truncation distance for integration of the likelihood function
+#' @param point logical, if 1 compute likelihood for point transects, if 0 (default) compute likelihood for line transects
 #' @param log if TRUE, return the log-likelihood
 #'
 #' @author Michael Scroggie
@@ -63,14 +64,18 @@ dHN <- nimbleFunction(
 	run = function(x = double(0),
 								 sigma = double(0),
 								 Xmax = double(0, default=100),
+								 point = logical(0, default=0),
 								 log = logical(0, default = 0)) {
 		returnType(double(0))
-		integral = pnorm(Xmax, 0, sigma)-0.5
-		p <- dnorm(x, 0, sigma)
-		L<-p/integral
-		LL<-log(L)
-		if(log) return(LL)
-		else return(L)
+	 	if(point) {integral = sigma^2 * (1 - exp(-(Xmax^2)/(2*sigma^2))) } else
+	 	             {integral = pnorm(Xmax, 0, sigma)-0.5 }
+	 	if(point) {p = x*exp(-(x^2)/(2*sigma^2))} else
+	                {p = exp(-(x^2)/(2*sigma^2)) }
+	 	L<-p/integral
+	 	LL<-log(L)
+	 	if(log) return(LL)
+	 	else return(L)
+
 	}
 )
 
@@ -79,8 +84,10 @@ dHN <- nimbleFunction(
 rHN<- nimbleFunction(
 	run = function(n = integer(),
 								 sigma = double(0),
-								 Xmax  = double(0, default=100)) {
+								 Xmax  = double(0, default=100),
+								 point = logical(0, default=0)) {
 		returnType(double(0))
+		#currently incorrect for point-based surveys
 		k<-0
 		while(k==0){
 			xrand<-rnorm(1, 0, sigma)
@@ -96,10 +103,13 @@ dHN_V <- nimbleFunction(
 	run = function(x = double(1),
 								 sigma = double(0),
 								 Xmax = double(0, default=100),
+								 point = logical(0, default=0),
 								 log = integer(0, default = 0)) {
 		returnType(double(0))
-		integral = pnorm(Xmax, 0, sigma)-0.5
-		p <- dnorm(x, 0, sigma)
+		if(point) {integral = sigma^2 * (1 - exp(-(Xmax^2)/(2*sigma^2))) } else
+		          {integral = pnorm(Xmax, 0, sigma)-0.5 }
+		if(point) {p = x*exp(-(x^2)/(2*sigma^2))} else
+		          {p = exp(-(x^2)/(2*sigma^2)) }
 		L<-p/integral
 		LL<-sum(log(L))
 		if(log) return(LL)
@@ -112,8 +122,10 @@ dHN_V <- nimbleFunction(
 rHN_V<- nimbleFunction(
 	run = function(n = integer(),
 								 sigma = double(0),
-								 Xmax  = double(0, default=100)) {
+								 Xmax  = double(0, default=100),
+								 point = logical(0, default=0)) {
 		returnType(double(0))
+		#currently incorrect for point-based surveys
 		k<-0
 		while(k==0){
 			xrand<-rnorm(1, 0, sigma)

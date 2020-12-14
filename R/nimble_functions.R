@@ -21,18 +21,16 @@
 									range = c(0, Inf))), verbose=FALSE)
 
 	registerDistributions(list(
-		dHN = list(BUGSdist="dHN(sigma, Xmax)",
+		dHN = list(BUGSdist="dHN(sigma, Xmax, point)",
 		#					 Rdist = "rHN(sigma, Xmax)",
 							 pqAvail = FALSE,
 							 range = c(0, Inf))), verbose=FALSE)
 
 	registerDistributions(list(
-		dHN_V = list(BUGSdist="dHN_V(sigma, Xmax)",
+		dHN_V = list(BUGSdist="dHN_V(sigma, Xmax, point)",
 		#						 Rhist="rHN_V(sigma, Xmax)",
 								 pqAvail = FALSE,
-								 types = c('value = double(1)', 'sigma = double(0)', 'Xmax = double(0)'),
+								 types = c('value = double(1)', 'sigma = double(0)', 'Xmax = double(0)', 'point = double(0)'),
 								 range = c(0, Inf))), verbose=FALSE)
-
-
 	})
 }
