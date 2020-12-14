@@ -76,8 +76,8 @@ abline(v=exp(wren.hn$ddf$par), col="blue", lwd=2) #Distance uses log-scale for p
 plot(samples[,"sigma"], type="l", col="red", las=1, ylab="value", xlab="iteration")
 #fitted distance function
 plot(wren.hn, lwd=2, las=1)
-lines(x=0:100, y=dHN(0:100, mean(samples[,"sigma"]))/
-                 dHN(0, mean(samples[,"sigma"])),
+lines(x=0:100, y=dHN(0:100, mean(samples[,"sigma"]), point=0)/
+                 dHN(0, mean(samples[,"sigma"]), point=0),
         col="red")
 ```
 
@@ -87,7 +87,7 @@ Next, we fit the hazard-rate distance function to the wren data using *nimbleDis
 y<-wren_lt$distance
 nind<-length(y)
 distCodeV<-nimbleCode({
- y[]~dHR_V(b, sigma, 100)
+ y[]~dHR_V(b, sigma, 100, point=0)
  sigma~dunif(1, 200)
  b~dunif(1, 50)
  })
@@ -116,8 +116,8 @@ plot(samples[,"sigma"], type="l", ylim=c(0, 100), col="red", las=1, ylab="value"
 lines(samples[,"b"], col="red")
 #fitted distance function
 plot(wren.hr, lwd=2, las=1)
-lines(x=0:100, y=dHR(0:100, mean(samples[,"b"]), mean(samples[,"sigma"]))/
-        dHR(0, mean(samples[,"b"]), mean(samples[,"sigma"])),
+lines(x=0:100, y=dHR(0:100, mean(samples[,"b"]), mean(samples[,"sigma"]), point=0)/
+        dHR(0, mean(samples[,"b"]), mean(samples[,"sigma"]), point=0),
       col="red")
 ```
 
