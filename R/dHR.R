@@ -13,6 +13,7 @@
 #' @param b shape of the hazard rate function
 #' @param sigma scale of the hazard rate function
 #' @param Xmax right truncation distance for integration of the likelihood function
+#' @param point logical value indicating that point surveys were used rather than line-transects. Defaults to zero.
 #' @param Xmin left truncation distance for integration of the likelihood function
 #' @param log if TRUE, return the log-likelihood
 #'
@@ -23,7 +24,7 @@
 #'
 #' #direct invocation of functions from R to evaluate the likelihood
 #' dHR(x=20, b=1, sigma=40, Xmax=100)
-#' dHR(x=20, b=1, sigma=40, Xmax=100)
+#' dHR(x=20, b=1, sigma=40, Xmax=100, point=1)
 #'
 #'N=500
 #'true_y<-runif(N, 0, 100)
@@ -36,13 +37,14 @@
 #'detect<-rbinom(N, 1, p_detect)
 #'#observations
 #'y<-true_y[detect==1]
+#'rug(y, side=1)
 #'nind<-length(y)
 #'hist(y, breaks=20)
 #'	distCodeV<-nimbleCode({
-#'  y[]~dHR_V(b, sigma, 100)
+#'  y[1:nind]~dHR_V(b, sigma, 100, point=0)
 #'  sigma~dunif(10, 70)
 #'  b~dunif(2, 20)
-#'  p_mean<-RintegralHR(b, sigma, 0, 100)/100
+#'  p_mean<-RintegralHR(b, sigma, 0, 100, point=0)/100
 #'  })
 #'#inits and monitors
 #'inits <- function() list(sigma=50, b=5)
@@ -67,13 +69,15 @@
 
 #helper functions for computing the integrals of the Hazard Rate distance function
 #' @export
-integralHR <- function(b=5, sigma=30,Xmin,Xmax){
-	F <- function(x){1-exp(-(x/sigma)^(-b))}
+integralHR <- function(b=5, sigma=30,Xmin,Xmax, point){
+	Fline <- function(x){1-exp(-(x/sigma)^(-b))} #for line transects
+	Fpoint <- function(x){x*(1-exp(-(x/sigma)^(-b)))} #for point transects
+	if(point==1) {F=Fpoint} else {F=Fline}
 	return(integrate(F,Xmin,Xmax, rel.tol = .Machine$double.eps^0.5)[[1]])
 }
 #' @export
 RintegralHR <- nimbleRcall(function(b=double(0), sigma=double(0), Xmin=double(0),
-																		Xmax=double(0)){}, Rfun='integralHR',
+																		Xmax=double(0), point=double(0)){}, Rfun='integralHR',
 													 returnType = double(0))
 
 #' @rdname dHR
@@ -83,10 +87,12 @@ dHR <- nimbleFunction(
 								 b = double(0),
 								 sigma = double(0),
 								 Xmax = double(0, default=100),
+								 point = logical(0, default = 0),
 								 log = logical(0, default = 0)) {
 		returnType(double(0))
-    integral = RintegralHR(b, sigma, 0, Xmax)
-		p <- 1-exp(-(x/sigma)^(-b))
+    integral = RintegralHR(b, sigma, 0, Xmax, point)
+    if(point==0) {p<-1-exp(-(x/sigma)^(-b)) } else  #line transects
+		             {p <- x*(1-exp(-(x/sigma)^(-b))) } #points
 		L<-p/integral
 		LL<-log(L)
 		if(log) return(LL)
@@ -100,7 +106,8 @@ rHR<- nimbleFunction(
 	run = function(n = integer(),
 								 b = double(0),
 								 sigma = double(0),
-								 Xmax  = double(0, default=100)) {
+								 Xmax  = double(0, default=100),
+								 point = logical(0, default = 0)) {
 		returnType(double(0))
 		k<-0
 		while(k==0){
@@ -122,11 +129,13 @@ dHR_V <- nimbleFunction(
 								 b = double(0),
 								 sigma = double(0),
 								 Xmax = double(0, default=100),
+								 point = logical(0, default = 0),
 								 log = integer(0, default = 0)) {
 		returnType(double(0))
-    integral = RintegralHR(b, sigma, 0, Xmax)
+    integral = RintegralHR(b, sigma, 0, Xmax, point)
 		# evaluate hazard rate function at x
-		p <- 1-exp(-(x/sigma)^(-b))
+    if(point==0) {p<-1-exp(-(x/sigma)^(-b)) } else  #line transects
+                 {p <- x*(1-exp(-(x/sigma)^(-b))) } #points
 		L<-p/integral
 		LL<-sum(log(L))
 		if(log) return(LL)
@@ -139,7 +148,8 @@ rHR_V<- nimbleFunction(
 	run = function(n = integer(),
 								 b = double(0),
 								 sigma = double(0),
-								 Xmax  = double(0, default=100)) {
+								 Xmax  = double(0, default=100),
+								 point = logical(0, default = 0)) {
 		returnType(double(0))
 		k<-0
 		while(k==0){

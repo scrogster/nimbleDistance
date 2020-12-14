@@ -22,7 +22,7 @@
 #'
 #' #direct invocation of functions from R to evaluate the likelihood
 #' dHN(x=20,  sigma=40, Xmax=100)
-#' dHN(x=20,  sigma=40, Xmax=100)
+#' dHN(x=20,  sigma=40, Xmax=100, point=1)
 #'
 #'N=1000
 #'true_y<-runif(N, 0, 100)
