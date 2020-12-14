@@ -87,13 +87,20 @@ rHN<- nimbleFunction(
 								 Xmax  = double(0, default=100),
 								 point = logical(0, default=0)) {
 		returnType(double(0))
-		#currently incorrect for point-based surveys
-		k<-0
-		while(k==0){
-			xrand<-rnorm(1, 0, sigma)
-			k= xrand>0 & xrand <Xmax
+		out<-numeric(n)
+		for(i in 1:n) {
+			k<-0
+			while(k==0){
+				if(point==0) {xrand<-runif(1, 0, Xmax)} else
+				{randpoint<-runif(2, -Xmax, Xmax)
+				xrand<-sqrt(sum(randpoint^2))}
+				p=exp(-(xrand^2)/(2*sigma^2))
+				detect<-rbinom(1, 1, p)
+				k= xrand*detect <Xmax & xrand*detect >0
+			}
+			out[i]<-xrand
 		}
-		return(xrand)
+		return(out)
 	}
 )
 
@@ -125,12 +132,19 @@ rHN_V<- nimbleFunction(
 								 Xmax  = double(0, default=100),
 								 point = logical(0, default=0)) {
 		returnType(double(0))
-		#currently incorrect for point-based surveys
-		k<-0
-		while(k==0){
-			xrand<-rnorm(1, 0, sigma)
-			k= xrand>0 & xrand <Xmax
+		out<-numeric(n)
+		for(i in 1:n) {
+			k<-0
+			while(k==0){
+				if(point==0) {xrand<-runif(1, 0, Xmax)} else
+				{randpoint<-runif(2, -Xmax, Xmax)
+				xrand<-sqrt(sum(randpoint^2))}
+				p=exp(-(xrand^2)/(2*sigma^2))
+				detect<-rbinom(1, 1, p)
+				k= xrand*detect <Xmax & xrand*detect >0
+			}
+			out[i]<-xrand
 		}
-		return(xrand)
+		return(out)
 	}
 )
