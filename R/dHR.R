@@ -68,7 +68,7 @@
 #helper functions for computing the integrals of the Hazard Rate distance function
 #' @export
 integralHR <- function(b=5, sigma=30,Xmin,Xmax){
-	F <- function(x){1-exp(-(x/sigma)^(-b))} #Expression of params
+	F <- function(x){1-exp(-(x/sigma)^(-b))}
 	return(integrate(F,Xmin,Xmax, rel.tol = .Machine$double.eps^0.5)[[1]])
 }
 #' @export

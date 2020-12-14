@@ -22,7 +22,7 @@ The *nimbleDistance* package is intended to provide some basic functions for imp
 
 This vignette demonstrate some simple distance sampling analyses using *nimbleDistance*, and compares the results with those obtained using equivalent distance-detection models in package *Distance* (Miller et al. 2019). As an example, we analyse some real line-transect data collected from a population of the winter wren *(Troglodytes troglodytes)* in Fife, Scotland, as originally described by Buckland et al. (2006), and compare the results obtained using *nimbleDistance* and *Distance*.
 
-## Analysis of the the wren data
+## Analysis of the the wren data (line transects)
 
 We begin by loading the required packages. The wren line-transect data are included in package *Distance*.
 
@@ -52,7 +52,7 @@ Next, we reproduce this very simple analysis using comparable Bayesian models im
 y<-wren_lt$distance
 nind<-length(y)
 distCodeV<-nimbleCode({
- y[1:nind]~dHN_V(sigma, 100)
+ y[1:nind]~dHN_V(sigma, 100, point=0)
  sigma~dunif(0, 100)
  })
 #inits and monitors
@@ -121,6 +121,53 @@ lines(x=0:100, y=dHR(0:100, mean(samples[,"b"]), mean(samples[,"sigma"]))/
       col="red")
 ```
 
+## Analysis of the the Savannah Sparrow data (point transects)
+
+Next, we turn to analysis of data from point-transects. The Savannah Sparrow data set (Knopf et al. 1988) provided in the *Distance* package provides a useful example. First, we analyse this data set using package *Distance* to obtain a maximum likelihood estimate of the scale paramter (sigma) of the assumed half-normal distance-detection function. 
+
+```{r}
+data(Savannah_sparrow_1980)
+hist(Savannah_sparrow_1980$distance, xlab="Distance (m)", 
+		 main="Savannah sparrow point transects", breaks=12)
+
+sasp.hn <- ds(data=Savannah_sparrow_1980, key="hn", adjustment=NULL,
+							transect="point")
+
+exp(sasp.hn$ddf$par)  #sigma =20.89
+```
+
+The analysis using *Distance* gives us a value for sigma of 20.89. 
+
+Next, we analyse the same data using nimbleDistance. Note the use of the argument 'point' in the nimbleCode to indicate that the distance data were obtained using point surveys, rather than line-transects. 
+```{r}
+y<-Savannah_sparrow_1980$distance
+y<-y[!is.na(y)] #drop the NAs
+nind<-length(y)
+distCodeV<-nimbleCode({
+	y[1:nind]~dHN_V(sigma, Xmax=80, point=1)
+	sigma~dunif(0, 50)
+})
+#inits and monitors
+inits <- function() list(sigma=5)
+params <- c("sigma")
+#generate some MCMC samples
+samples <- nimbleMCMC(
+	code = distCodeV,
+	constants = list(y=y, nind=nind), ## the distance data
+	inits = inits,
+	monitors = params,
+	niter = 5000,
+	nburnin = 1000)
+
+```
+
+```{r}
+hist(samples[,"sigma"], breaks=30)
+abline(v=exp(sasp.hn$ddf$par), col="red", lwd=3) #MLE from Distance
+abline(v=mean(samples[,"sigma"]), col="blue", lwd=3)
+```
+As expected, the posterior mean of sigma estimated using *nimbleDistance* is very close to the MLE estimated using *Distance*.
+
 ## References
 
 Buckland, S. T. (2006) Point-transect surveys for songbirds: robust methodologies. *The Auk* 123 (2): 345–357.
@@ -129,6 +176,8 @@ de Valpine, P., D. Turek, C.J. Paciorek, C. Anderson-Bergman, D. Temple Lang, an
 
 de Valpine P, Paciorek C, Turek D, Michaud N, Anderson-Bergman C, Obermeyer F, Wehrhahn Cortes C, Rodriguez A, Temple Lang D,
 Paganin S (2020). *NIMBLE: MCMC, Particle Filtering, and Programmable Hierarchical Modeling*. R package version 0.10.0
+
+Knopf, F.L., J.A. Sedgwick, and R.W. Cannon. (1988) Guild structure of a riparian avifauna relative to seasonal cattle grazing. The Journal of Wildlife Management 52 (2): 280–290.
 
 Miller DL, Rexstad E, Thomas L, Marshall L, Laake JL (2019). Distance Sampling in R. *Journal of Statistical Software*,
 89(1), 1-28.

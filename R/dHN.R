@@ -37,7 +37,7 @@
 #'nind<-length(y)
 #'hist(y, breaks=20)
 #'	distCodeV<-nimbleCode({
-#'  y[1:nind]~dHN_V(sigma, 100)
+#'  y[1:nind]~dHN_V(sigma, 100, point=0)
 #'  sigma~dunif(10, 70)
 #'  })
 #'#inits and monitors
@@ -86,7 +86,7 @@ rHN<- nimbleFunction(
 								 sigma = double(0),
 								 Xmax  = double(0, default=100),
 								 point = logical(0, default=0)) {
-		returnType(double(0))
+		returnType(double(1))
 		out<-numeric(n)
 		for(i in 1:n) {
 			k<-0
@@ -131,7 +131,7 @@ rHN_V<- nimbleFunction(
 								 sigma = double(0),
 								 Xmax  = double(0, default=100),
 								 point = logical(0, default=0)) {
-		returnType(double(0))
+		returnType(double(1))
 		out<-numeric(n)
 		for(i in 1:n) {
 			k<-0
