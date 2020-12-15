@@ -4,9 +4,9 @@
 
 This repository provides some user-defined distributions that can be used to implement distance sampling models in nimble:
 
-* likelihoods for common distance-detection distributions (hazard-rate and half-normal).
+* Includes likelihoods for common distance-detection distributions (hazard-rate and half-normal) using both line-transect and point surveys.
 
-* a vignette illustrating use of the package to undertake a simple analysis of distance-detection data collected on line transects.
+* Includes a vignette illustrating use of the package to undertake some simple analyses of distance-detection data collected on lines and points.
 
 The package is at a very early stage of development. Suggestions for improvement and contributions of code are very welcome.
 
