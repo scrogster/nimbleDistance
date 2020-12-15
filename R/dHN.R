@@ -58,22 +58,7 @@
 #'hist(y, freq=FALSE)
 #'lines(x=1:100, y=dHN(1:100, mean(samples[,"sigma"])), col="red")
 #'hist(samples[,"sigma"], col="red")
-
-#helper functions for computing the integrals of the Half-normal distance function
-#currently using numerical integration - analytic approaches may be superior
-#' @export
-integralHN <- function(sigma=30,Xmin,Xmax, point=0){
-	Fline <- function(x){dnorm(x, 0, sigma)} #for line transects        g(x)
-	Fpoint <- function(x){x*dnorm(x, 0, sigma)} #for point transects: x.g(x)
-	if(point==1) {F=Fpoint} else {F=Fline}
-	return(integrate(F,Xmin,Xmax, rel.tol = .Machine$double.eps^0.5)[[1]])
-}
-#' @export
-RintegralHN <- nimbleRcall(function(sigma=double(0), Xmin=double(0),
-																		Xmax=double(0), point=double(0)){}, Rfun='integralHN',
-													 returnType = double(0))
-
-
+#'
 #' @rdname dHN
 #' @export
 dHN <- nimbleFunction(
@@ -83,10 +68,14 @@ dHN <- nimbleFunction(
 								 point = double(0, default=0),
 								 log = double(0, default = 0)) {
 		returnType(double(0))
-		integral<-RintegralHN(sigma, 0, Xmax, point)
-		if(point==0) {p = dnorm(x, 0, sigma)} else #line transects
-                 {p = x*dnorm(x, 0, sigma)}     #point transects
-		L<-p/integral
+		#line transect likelihood
+		if(point==0) {integral=pnorm(Xmax, 0, sigma)-0.5
+		              g = dnorm(x, 0, sigma)
+		              L=g/integral} else
+		#point transect likelihood
+		if(point==1) {integral <- sigma^2 * (1 - exp(-(Xmax^2)/(2*sigma^2)))
+		             g <- exp(-(x^2)/(2*sigma^2))
+		             L <- (x * g)/integral }
 		LL<-log(L)
 		if(log) return(LL)
 		else return(L)
@@ -124,10 +113,14 @@ dHN_V <- nimbleFunction(
 								 point = double(0, default=0),
 								 log = double(0, default = 0)) {
 		returnType(double(0))
-		integral<-RintegralHN(sigma, 0, Xmax, point)
-		if(point==0) {p = dnorm(x, 0, sigma) } else
-		             {p = x*dnorm(x, 0, sigma)}
-		L<-p/integral
+		#line transect likelihood
+		if(point==0) {integral=pnorm(Xmax, 0, sigma)-0.5
+		              g = dnorm(x, 0, sigma)
+		              L=g/integral} else
+			#point transect likelihood
+			if(point==1) {integral <- sigma^2 * (1 - exp(-(Xmax^2)/(2*sigma^2)))
+			              g <- exp(-(x^2)/(2*sigma^2))
+			              L <- (x * g)/integral }
 		LL<-sum(log(L))
 		if(log) return(LL)
 		else return(exp(LL))

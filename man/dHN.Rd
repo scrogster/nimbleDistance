@@ -2,14 +2,11 @@
 % Please edit documentation in R/dHN.R
 \name{dHN}
 \alias{dHN}
-\alias{integralHN}
 \alias{dHN_V}
 \alias{rHN}
 \alias{rHN_V}
 \title{Half-normal distribution for use in \code{nimble} models}
 \usage{
-integralHN(sigma = 30, Xmin, Xmax, point = 0)
-
 dHN(x, sigma, Xmax = 100, point = 0, log = 0)
 
 rHN(n, sigma, Xmax = 100, point = 0)
@@ -19,17 +16,17 @@ dHN_V(x, sigma, Xmax = 100, point = 0, log = 0)
 rHN_V(n, sigma, Xmax = 100, point = 0)
 }
 \arguments{
-\item{sigma}{scale of the half-normal distribution}
+\item{x}{distance data. either a single value (dHN) or a vector of values (dHN_V)}
 
-\item{Xmin}{left truncation distance for integration of the likelihood function}
+\item{sigma}{scale of the half-normal distribution}
 
 \item{Xmax}{right truncation distance for integration of the likelihood function}
 
 \item{point}{logical, if 1 compute likelihood for point transects, if 0 (default) compute likelihood for line transects}
 
-\item{x}{distance data. either a single value (dHN) or a vector of values (dHN_V)}
-
 \item{log}{if TRUE, return the log-likelihood}
+
+\item{Xmin}{left truncation distance for integration of the likelihood function}
 }
 \description{
 \code{dHN} and \code{dHN_V} provide hazard-rate detection
@@ -77,6 +74,7 @@ layout(matrix(1:2, nrow=2))
 hist(y, freq=FALSE)
 lines(x=1:100, y=dHN(1:100, mean(samples[,"sigma"])), col="red")
 hist(samples[,"sigma"], col="red")
+
 }
 \author{
 Michael Scroggie
