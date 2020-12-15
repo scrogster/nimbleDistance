@@ -69,7 +69,7 @@
 
 #helper functions for computing the integrals of the Hazard Rate distance function
 #' @export
-integralHR <- function(b=5, sigma=30,Xmin,Xmax, point){
+integralHR <- function(b=5, sigma=30,Xmin,Xmax, point=0){
 	Fline <- function(x){1-exp(-(x/sigma)^(-b))} #for line transects
 	Fpoint <- function(x){x*(1-exp(-(x/sigma)^(-b)))} #for point transects
 	if(point==1) {F=Fpoint} else {F=Fline}
@@ -87,8 +87,8 @@ dHR <- nimbleFunction(
 								 b = double(0),
 								 sigma = double(0),
 								 Xmax = double(0, default=100),
-								 point = logical(0, default = 0),
-								 log = logical(0, default = 0)) {
+								 point = double(0, default = 0),
+								 log = double(0, default = 0)) {
 		returnType(double(0))
     integral = RintegralHR(b, sigma, 0, Xmax, point)
     if(point==0) {p<-1-exp(-(x/sigma)^(-b)) } else  #line transects
@@ -107,7 +107,7 @@ rHR<- nimbleFunction(
 								 b = double(0),
 								 sigma = double(0),
 								 Xmax  = double(0, default=100),
-								 point = logical(0, default = 0)) {
+								 point = double(0, default = 0)) {
 		returnType(double(0))
 		k<-0
 		while(k==0){
@@ -129,8 +129,8 @@ dHR_V <- nimbleFunction(
 								 b = double(0),
 								 sigma = double(0),
 								 Xmax = double(0, default=100),
-								 point = logical(0, default = 0),
-								 log = integer(0, default = 0)) {
+								 point = double(0, default = 0),
+								 log = double(0, default = 0)) {
 		returnType(double(0))
     integral = RintegralHR(b, sigma, 0, Xmax, point)
 		# evaluate hazard rate function at x

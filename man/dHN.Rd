@@ -2,41 +2,47 @@
 % Please edit documentation in R/dHN.R
 \name{dHN}
 \alias{dHN}
+\alias{integralHN}
 \alias{dHN_V}
 \alias{rHN}
 \alias{rHN_V}
 \title{Half-normal distribution for use in \code{nimble} models}
 \usage{
-dHN(x, sigma, Xmax = 100, log = 0)
+integralHN(sigma = 30, Xmin, Xmax, point = 0)
 
-rHN(n, sigma, Xmax = 100)
+dHN(x, sigma, Xmax = 100, point = 0, log = 0)
 
-dHN_V(x, sigma, Xmax = 100, log = 0)
+rHN(n, sigma, Xmax = 100, point = 0)
 
-rHN_V(n, sigma, Xmax = 100)
+dHN_V(x, sigma, Xmax = 100, point = 0, log = 0)
+
+rHN_V(n, sigma, Xmax = 100, point = 0)
 }
 \arguments{
-\item{x}{distance data. either a single value (dHN) or a vector of values (dHN_V)}
-
 \item{sigma}{scale of the half-normal distribution}
+
+\item{Xmin}{left truncation distance for integration of the likelihood function}
 
 \item{Xmax}{right truncation distance for integration of the likelihood function}
 
-\item{log}{if TRUE, return the log-likelihood}
+\item{point}{logical, if 1 compute likelihood for point transects, if 0 (default) compute likelihood for line transects}
 
-\item{Xmin}{left truncation distance for integration of the likelihood function}
+\item{x}{distance data. either a single value (dHN) or a vector of values (dHN_V)}
+
+\item{log}{if TRUE, return the log-likelihood}
 }
 \description{
 \code{dHN} and \code{dHN_V} provide hazard-rate detection
 distributions that can be used directly from R or in \code{nimble}
 models. The corresponding randomisation routines \code{rHN} and \code{rHN_V} generate random distances
 from the corresponding distance-detection distribution.
+\code{integralHN} is a helper function for computing the integral for the half-normal function with the specified parameters.
 }
 \examples{
 
 #direct invocation of functions from R to evaluate the likelihood
 dHN(x=20,  sigma=40, Xmax=100)
-dHN(x=20,  sigma=40, Xmax=100)
+dHN(x=20,  sigma=40, Xmax=100, point=1)
 
 N=1000
 true_y<-runif(N, 0, 100)
@@ -51,7 +57,7 @@ y<-true_y[detect==1]
 nind<-length(y)
 hist(y, breaks=20)
 distCodeV<-nimbleCode({
- y[1:nind]~dHN_V(sigma, 100)
+ y[1:nind]~dHN_V(sigma, 100, point=0)
  sigma~dunif(10, 70)
  })
 #inits and monitors

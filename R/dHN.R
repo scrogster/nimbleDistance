@@ -4,6 +4,7 @@
 #' distributions that can be used directly from R or in \code{nimble}
 #' models. The corresponding randomisation routines \code{rHN} and \code{rHN_V} generate random distances
 #' from the corresponding distance-detection distribution.
+#' \code{integralHN} is a helper function for computing the integral for the half-normal function with the specified parameters.
 #'
 #' @aliases dHN dHN_V rHN rHN_V
 #'
@@ -58,24 +59,37 @@
 #'lines(x=1:100, y=dHN(1:100, mean(samples[,"sigma"])), col="red")
 #'hist(samples[,"sigma"], col="red")
 
+#helper functions for computing the integrals of the Half-normal distance function
+#currently using numerical integration - analytic approaches may be superior
+#' @export
+integralHN <- function(sigma=30,Xmin,Xmax, point=0){
+	Fline <- function(x){dnorm(x, 0, sigma)} #for line transects        g(x)
+	Fpoint <- function(x){x*dnorm(x, 0, sigma)} #for point transects: x.g(x)
+	if(point==1) {F=Fpoint} else {F=Fline}
+	return(integrate(F,Xmin,Xmax, rel.tol = .Machine$double.eps^0.5)[[1]])
+}
+#' @export
+RintegralHN <- nimbleRcall(function(sigma=double(0), Xmin=double(0),
+																		Xmax=double(0), point=double(0)){}, Rfun='integralHN',
+													 returnType = double(0))
+
+
 #' @rdname dHN
 #' @export
 dHN <- nimbleFunction(
 	run = function(x = double(0),
 								 sigma = double(0),
 								 Xmax = double(0, default=100),
-								 point = logical(0, default=0),
-								 log = logical(0, default = 0)) {
+								 point = double(0, default=0),
+								 log = double(0, default = 0)) {
 		returnType(double(0))
-	 	if(point) {integral = sigma^2 * (1 - exp(-(Xmax^2)/(2*sigma^2))) } else
-	 	             {integral = pnorm(Xmax, 0, sigma)-0.5 }
-	 	if(point) {p = x*exp(-(x^2)/(2*sigma^2))} else
-	                {p = exp(-(x^2)/(2*sigma^2)) }
-	 	L<-p/integral
-	 	LL<-log(L)
-	 	if(log) return(LL)
-	 	else return(L)
-
+		integral<-RintegralHN(sigma, 0, Xmax, point)
+		if(point==0) {p = dnorm(x, 0, sigma)} else #line transects
+                 {p = x*dnorm(x, 0, sigma)}     #point transects
+		L<-p/integral
+		LL<-log(L)
+		if(log) return(LL)
+		else return(L)
 	}
 )
 
@@ -85,10 +99,9 @@ rHN<- nimbleFunction(
 	run = function(n = integer(),
 								 sigma = double(0),
 								 Xmax  = double(0, default=100),
-								 point = logical(0, default=0)) {
-		returnType(double(1))
+								 point = double(0, default=0)) {
+		returnType(double(0))
 		out<-numeric(n)
-		for(i in 1:n) {
 			k<-0
 			while(k==0){
 				if(point==0) {xrand<-runif(1, 0, Xmax)} else
@@ -98,9 +111,7 @@ rHN<- nimbleFunction(
 				detect<-rbinom(1, 1, p)
 				k= xrand*detect <Xmax & xrand*detect >0
 			}
-			out[i]<-xrand
-		}
-		return(out)
+		return(xrand)
 	}
 )
 
@@ -110,13 +121,12 @@ dHN_V <- nimbleFunction(
 	run = function(x = double(1),
 								 sigma = double(0),
 								 Xmax = double(0, default=100),
-								 point = logical(0, default=0),
-								 log = integer(0, default = 0)) {
+								 point = double(0, default=0),
+								 log = double(0, default = 0)) {
 		returnType(double(0))
-		if(point) {integral = sigma^2 * (1 - exp(-(Xmax^2)/(2*sigma^2))) } else
-		          {integral = pnorm(Xmax, 0, sigma)-0.5 }
-		if(point) {p = x*exp(-(x^2)/(2*sigma^2))} else
-		          {p = exp(-(x^2)/(2*sigma^2)) }
+		integral<-RintegralHN(sigma, 0, Xmax, point)
+		if(point==0) {p = dnorm(x, 0, sigma) } else
+		             {p = x*dnorm(x, 0, sigma)}
 		L<-p/integral
 		LL<-sum(log(L))
 		if(log) return(LL)
@@ -130,7 +140,7 @@ rHN_V<- nimbleFunction(
 	run = function(n = integer(),
 								 sigma = double(0),
 								 Xmax  = double(0, default=100),
-								 point = logical(0, default=0)) {
+								 point = double(0, default=0)) {
 		returnType(double(1))
 		out<-numeric(n)
 		for(i in 1:n) {

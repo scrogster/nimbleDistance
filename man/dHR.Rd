@@ -8,15 +8,15 @@
 \alias{rHR_V}
 \title{Hazard rate distribution for use in \code{nimble} models}
 \usage{
-integralHR(b = 5, sigma = 30, Xmin, Xmax)
+integralHR(b = 5, sigma = 30, Xmin, Xmax, point = 0)
 
-dHR(x, b, sigma, Xmax = 100, log = 0)
+dHR(x, b, sigma, Xmax = 100, point = 0, log = 0)
 
-rHR(n, b, sigma, Xmax = 100)
+rHR(n, b, sigma, Xmax = 100, point = 0)
 
-dHR_V(x, b, sigma, Xmax = 100, log = 0)
+dHR_V(x, b, sigma, Xmax = 100, point = 0, log = 0)
 
-rHR_V(n, b, sigma, Xmax = 100)
+rHR_V(n, b, sigma, Xmax = 100, point = 0)
 }
 \arguments{
 \item{b}{shape of the hazard rate function}
@@ -26,6 +26,8 @@ rHR_V(n, b, sigma, Xmax = 100)
 \item{Xmin}{left truncation distance for integration of the likelihood function}
 
 \item{Xmax}{right truncation distance for integration of the likelihood function}
+
+\item{point}{logical value indicating that point surveys were used rather than line-transects. Defaults to zero.}
 
 \item{x}{distance data. either a single value (dHR) or a vector of values (dHR_V)}
 
@@ -42,7 +44,7 @@ from the corresponding hazard-rate distribution.
 
 #direct invocation of functions from R to evaluate the likelihood
 dHR(x=20, b=1, sigma=40, Xmax=100)
-dHR(x=20, b=1, sigma=40, Xmax=100)
+dHR(x=20, b=1, sigma=40, Xmax=100, point=1)
 
 N=500
 true_y<-runif(N, 0, 100)
@@ -55,13 +57,14 @@ plot(p_detect~true_y, type="p")
 detect<-rbinom(N, 1, p_detect)
 #observations
 y<-true_y[detect==1]
+rug(y, side=1)
 nind<-length(y)
 hist(y, breaks=20)
 distCodeV<-nimbleCode({
- y[]~dHR_V(b, sigma, 100)
+ y[1:nind]~dHR_V(b, sigma, 100, point=0)
  sigma~dunif(10, 70)
  b~dunif(2, 20)
- p_mean<-RintegralHR(b, sigma, 0, 100)/100
+ p_mean<-RintegralHR(b, sigma, 0, 100, point=0)/100
  })
 #inits and monitors
 inits <- function() list(sigma=50, b=5)
