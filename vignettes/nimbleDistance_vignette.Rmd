@@ -171,15 +171,14 @@ As expected, the posterior mean of sigma estimated using *nimbleDistance* is ver
 
 ## References
 
-Buckland, S. T. (2006) Point-transect surveys for songbirds: robust methodologies. *The Auk* 123 (2): 345–357.
+Buckland, S. T. (2006) Point-transect surveys for songbirds: robust methodologies. *The Auk* 123: 345–357.
 
 de Valpine, P., D. Turek, C.J. Paciorek, C. Anderson-Bergman, D. Temple Lang, and R. Bodik. 2017. Programming with models: writing statistical algorithms for general model structures with NIMBLE. *Journal of Computational and Graphical Statistics* 26: 403-413.
 
-de Valpine P, Paciorek C, Turek D, Michaud N, Anderson-Bergman C, Obermeyer F, Wehrhahn Cortes C, Rodriguez A, Temple Lang D,
-Paganin S (2020). *NIMBLE: MCMC, Particle Filtering, and Programmable Hierarchical Modeling*. R package version 0.10.0
+de Valpine P, Paciorek C, Turek D, Michaud N, Anderson-Bergman C, Obermeyer F, Wehrhahn Cortes C, Rodriguez A, Temple Lang D, Paganin S (2020). *NIMBLE: MCMC, Particle Filtering, and Programmable Hierarchical Modeling*. R package version 0.10.0
 
-Knopf, F.L., J.A. Sedgwick, and R.W. Cannon. (1988) Guild structure of a riparian avifauna relative to seasonal cattle grazing. The Journal of Wildlife Management 52 (2): 280–290.
+Knopf, F.L., J.A. Sedgwick, and R.W. Cannon. (1988) Guild structure of a riparian avifauna relative to seasonal cattle grazing. *Journal of Wildlife Management* 52: 280–290.
 
 Miller DL, Rexstad E, Thomas L, Marshall L, Laake JL (2019). Distance Sampling in R. *Journal of Statistical Software*,
-89(1), 1-28.
+89: 1-28.
 
