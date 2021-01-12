@@ -1,6 +1,7 @@
 Package: nimbleDistance
 Title: Functions to Fit Bayesian distance sampling models using nimble
-Version: 0.0.1
+Version: 0.0.2
+Date: 2020-01-12
 Authors@R: 
     c(person(given = "Michael",
              family = "Scroggie",
