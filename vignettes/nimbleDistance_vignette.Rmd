@@ -4,7 +4,7 @@ author: "Michael Scroggie"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{nimbleDistance}
+  %\VignetteIndexEntry{Bayesian analysis of distance sampling data using the nimbleDistance package}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
