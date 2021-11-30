@@ -1,6 +1,6 @@
 #' Half-normal distribution for use in \code{nimble} models
 #'
-#' \code{dHN} and \code{dHN_V} provide hazard-rate detection
+#' \code{dHN} and \code{dHN_V} provide half-normal detection
 #' distributions that can be used directly from R or in \code{nimble}
 #' models. The corresponding randomisation routines \code{rHN} and \code{rHN_V} generate random distances
 #' from the corresponding distance-detection distribution.
