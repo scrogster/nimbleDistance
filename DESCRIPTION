@@ -22,7 +22,9 @@ URL: https://github.com/scrogster/nimbleDistance
 Collate:
   dHR.R
   dHN.R
+  dHR_binned.R
+  dHN_binned.R
   nimble_functions.R
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.3
 VignetteBuilder: knitr
