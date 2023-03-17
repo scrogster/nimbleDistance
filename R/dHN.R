@@ -4,12 +4,11 @@
 #' distributions that can be used directly from R or in \code{nimble}
 #' models. The corresponding randomisation routines \code{rHN} and \code{rHN_V} generate random distances
 #' from the corresponding distance-detection distribution.
-#' \code{integralHN} is a helper function for computing the integral for the half-normal function with the specified parameters.
 #'
 #' @aliases dHN dHN_V rHN rHN_V
 #'
 #' @name dHN
-#' @param x distance data. either a single value (dHN) or a vector of values (dHN_V)
+#' @param x distance observations. either a single value (dHN) or a vector of values (dHN_V)
 #' @param sigma scale of the half-normal distribution
 #' @param Xmax right truncation distance for integration of the likelihood function
 #' @param Xmin left truncation distance for integration of the likelihood function
