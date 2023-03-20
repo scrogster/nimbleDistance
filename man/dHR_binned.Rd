@@ -5,7 +5,9 @@
 \alias{dHR_binned_V}
 \title{Hazard rate distribution for use in \code{nimble} models}
 \usage{
-dHR_binned_V(x, sigma, b, Xmax = 100, breaks, point, log = 0)
+dHR_binned_V(x, sigma, b, Xmax = 100, breaks, point = 0, log = 0)
+
+dHR_binned(x, sigma, b, Xmax = 100, breaks, point, log = 0)
 }
 \arguments{
 \item{x}{distance data. either a single value (dHR) or a vector of values (dHR_V). As data are binned these
@@ -32,9 +34,9 @@ models.
 }
 \examples{
 
-#direct invocation of functions from R to evaluate the likelihood
-dHR_binned(x=20, b=1, sigma=40, Xmax=100)
-dHR_binned(x=20, b=1, sigma=40, Xmax=100, point=1)
+#direct invocation of functions from R to evaluate likelihoods
+dHR_binned(x=20, b=1, sigma=40, breaks=seq(0, 100, by=20), Xmax=100, point=0)
+dHR_binned_V(x=c(20, 21, 41), b=1, sigma=40, breaks=seq(0, 100, by=20), Xmax=100, point=0)
 
 N=500
 true_y<-runif(N, 0, 100)
@@ -52,7 +54,7 @@ nind<-length(y)
 hist(y, breaks=20)
 
 distCode_binned<-nimbleCode({
- y[1:nind]~dHR_binned_V(b, sigma, 100, breaks=seq(0, 100, by=20), point=0)
+ y[1:nind]~dHR_binned_V(b, sigma, 100, breaks=br[1:6], point=0)
  sigma~dunif(10, 70)
  b~dunif(2, 20)
  p_mean<-RintegralHR(b, sigma, 0, 100, point=0)/100
@@ -64,7 +66,7 @@ params <- c("sigma", "b", "p_mean")
 #generate some MCMC samples
 samples <- nimbleMCMC(
 code = distCode_binned,
-constants = list(y=y, nind=nind), ## the distance data
+constants = list(y=y, nind=nind, br=seq(0, 100, by=20)), ## the distance data
 inits = inits,
 monitors = params,
 niter = 1000,

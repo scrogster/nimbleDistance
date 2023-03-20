@@ -20,9 +20,9 @@
 #' @author Michael Scroggie
 #' @examples
 #'
-#' #direct invocation of functions from R to evaluate the likelihood
-#' dHR_binned(x=20, b=1, sigma=40, Xmax=100)
-#' dHR_binned(x=20, b=1, sigma=40, Xmax=100, point=1)
+#' #direct invocation of functions from R to evaluate likelihoods
+#' dHR_binned(x=20, b=1, sigma=40, Xmax=100, breaks=seq(0, 100, by=20),  point=0)
+#' dHR_binned_V(x=c(20, 21, 41), b=1, sigma=40, Xmax=100, breaks=seq(0, 100, by=20),  point=0)
 #'
 #'N=500
 #'true_y<-runif(N, 0, 100)
@@ -39,43 +39,37 @@
 #'nind<-length(y)
 #'hist(y, breaks=20)
 #'
-#'	distCode_binned<-nimbleCode({
-#'  y[1:nind]~dHR_binned_V(b, sigma, 100, breaks=seq(0, 100, by=20), point=0)
-#'  sigma~dunif(10, 70)
-#'  b~dunif(2, 20)
-#'  p_mean<-RintegralHR(b, sigma, 0, 100, point=0)/100
-#'  })
+#'distCode_binned<-nimbleCode({
+#'	y[1:nind]~dHR_binned_V(b=b, sigma=sigma, Xmax=100, breaks=br[], point=0)
+#'	sigma~dunif(10, 70)
+#'	b~dunif(2, 20)
+#'})
 #'#inits and monitors
 #'inits <- function() list(sigma=50, b=5)
-#'params <- c("sigma", "b", "p_mean")
+#'params <- c("sigma", "b")
 #'
 #'#generate some MCMC samples
 #'samples <- nimbleMCMC(
-#'	code = distCode_binned,
-#'	constants = list(y=y, nind=nind), ## the distance data
+#' code = distCode_binned,
+#'	constants = list(y=y, nind=nind, br=c(0, 20, 40, 60, 80, 100)), ## the distance data
 #'	inits = inits,
 #'	monitors = params,
 #'	niter = 1000,
 #'	nburnin = 500)
 #'
-#'layout(matrix(1:3, nrow=3))
-#'hist(samples[,"sigma"], col="red", xlab="sigma")
-#'abline(v=sigma_true, col="blue", lwd=2)
-#'hist(samples[,"b"], col="red", xlab="b")
-#'abline(v=b_true, col="blue", lwd=2)
-#'hist(y, freq=FALSE)
-#'lines(x=1:100, y=dHR(1:100, mean(samples[,"b"])), mean(samples[,"sigma"])), col="red")
-#'#' @rdname dHR_binned
+#'hist(samples[,"sigma"])
+#'hist(samples[,"b"])
+#' @rdname dHR_binned
 #' @export
-dHR_binned_V<- nimbleFunction(
+dHR_binned<- nimbleFunction(
 	#just use lines rather than transect as POC.
-	run = function(x = double(1),  #vector of distance observation
+	run = function(x = double(0),  #single distance observation
+								 b = double(0), #scalar b
 								 sigma = double(0), #scalar sigma
-								 b = double(0),
 								 Xmax = double(0, default=100),  #right truncation distance
+								 point=double(0, default = 0),
 								 breaks=double(1),  #vector of breaks
-								 point=double(0),
-								 log = logical(0, default = 0)) {
+								 log = double(0, default = 0)) {
 		returnType(double(0))
 		#check consistency of breakpoints
 		if(min(x)<0){nimStop("Error: Distance less than zero")}
@@ -86,10 +80,9 @@ dHR_binned_V<- nimbleFunction(
 		nbins=nbreaks-1
 		xtots=numeric(nbins)
 		xtots[1:nbins]<-0
-		nind=length(x)
 		#compute bin totals
 		for(i in 1:nbins){
-			xtots[i]<-sum(x>breaks[i] & x<breaks[i+1])
+			xtots[i]<-x>=breaks[i] & x<breaks[i+1]
 		}
 		#compute the bin probabilities conditional on sigma, b and breaks
 		#integralHR <- function(b=5, sigma=30,Xmin,Xmax, point=0){
@@ -99,50 +92,94 @@ dHR_binned_V<- nimbleFunction(
 			p[i]=RintegralHR(b=b, sigma=sigma, breaks[i], breaks[i+1], point=point)/tot_area
 		}
 		# #multinomial log-likelihood for the observed bin counts
-		LL=dmulti(x=xtots, size=nind, prob=p, log=TRUE)
+		LL=dmulti(x=xtots, size=1, prob=p, log=TRUE)
 		#hack to deal with really small likelihood values
 		if(LL==-Inf){LL<- -1000}
 		if(log){ return(LL) } else return(exp(LL))
 	}
 )
 
-#' @rdname dHR
+#' #' @rdname dHR_binned
+#' #' @export
+ rHR_binned<- nimbleFunction(
+ 	run = function(n = integer(),
+ 								 b = double(0),
+ 								 sigma = double(0),
+ 								 Xmax  = double(0, default=100),
+ 								 point = double(0, default = 0),
+ 								 breaks=double(1) #vector of breaks
+ 								 ) {
+ 		returnType(double(0))
+ 		k<-0
+ 		while(k==0){
+ 			xrand<-runif(1, 0, Xmax)
+ 			p <- 1-exp(-(xrand/sigma)^(-b))
+ 			k=rbinom(1, 1, p)
+ 		}
+ 		return(xrand)
+ 	}
+)
+
+
+#'#' @rdname dHR_binned
 #' @export
-dHR_binned<- nimbleFunction(
-	#just use lines rather than transect as POC.
-	run = function(x = double(0),  #single distance observation
+ dHR_binned_V<- nimbleFunction(
+ 	#just use lines rather than transect as POC.
+ 	run = function(x = double(1),  #vector of distance observation
+ 								 b = double(0),
+ 								 sigma = double(0), #scalar sigma
+ 								 Xmax = double(0, default=100),  #right truncation distance
+ 								 point=double(0, default=0),
+ 								 breaks=double(1),  #vector of breaks
+ 								 log = double(0, default = 0)) {
+ 		returnType(double(0))
+ 		#check consistency of breakpoints
+ 		if(min(x)<0){nimStop("Error: Distance less than zero")}
+ 		if(max(breaks)<Xmax){nimStop("Error: break greater than Xmax")}
+ 		if(min(breaks)!=0){nimStop("Error: expect minimum break at zero")}
+ 		#compute bin totals
+ 		nbreaks=length(breaks)
+ 		nbins=nbreaks-1
+ 		xtots=numeric(nbins)
+ 		xtots[1:nbins]<-0
+ 		nind=length(x)
+ 		#compute bin totals
+ 		for(i in 1:nbins){
+ 			xtots[i]<-sum(x>=breaks[i] & x<breaks[i+1])
+ 		}
+ 		#compute the bin probabilities conditional on sigma, b and breaks
+ 		#integralHR <- function(b=5, sigma=30,Xmin,Xmax, point=0){
+ 		p=numeric(nbins) #store probabilities
+ 		tot_area=RintegralHR(b=b, sigma=sigma, 0, Xmax, point=point)
+ 		for(i in 1:nbins){
+ 			p[i]=RintegralHR(b=b, sigma=sigma, breaks[i], breaks[i+1], point=point)/tot_area
+ 		}
+ 		# #multinomial log-likelihood for the observed bin counts
+ 		LL=dmulti(x=xtots, size=nind, prob=p, log=TRUE)
+ 		#hack to deal with really small likelihood values
+ 		if(LL==-Inf){LL<- -1000}
+ 		if(log){ return(LL) } else return(exp(LL))
+ 	}
+ )
+#' @rdname dHR_binned
+#' @export
+rHR_binned_V<- nimbleFunction(
+	run = function(n = integer(),
+								 b = double(0),
 								 sigma = double(0), #scalar sigma
-								 b = double(0), #scalar b
 								 Xmax = double(0, default=100),  #right truncation distance
-								 breaks=double(1),  #vector of breaks
-								 point=double(0),
-								 log = logical(0, default = 0)) {
+								 point=double(0, default=0),
+								 breaks=double(1) #vector of breaks
+								 ) {
 		returnType(double(0))
-		#check consistency of breakpoints
-		if(min(x)<0){nimStop("Error: Distance less than zero")}
-		if(max(breaks)<Xmax){nimStop("Error: break greater than Xmax")}
-		if(min(breaks)!=0){nimStop("Error: expect minimum break at zero")}
-		#compute bin totals
-		nbreaks=length(breaks)
-		nbins=nbreaks-1
-		xtots=numeric(nbins)
-		xtots[1:nbins]<-0
-		nind=length(x)
-		#compute bin totals
-		for(i in 1:nbins){
-			xtots[i]<-sum(x>breaks[i] & x<breaks[i+1])
+		k<-0
+		while(k==0){
+			xrand<-runif(1, 0, Xmax)
+			p <- 1-exp(-(xrand/sigma)^(-b))
+			k=rbinom(1, 1, p)
 		}
-		#compute the bin probabilities conditional on sigma, b and breaks
-		#integralHR <- function(b=5, sigma=30,Xmin,Xmax, point=0){
-		p=numeric(nbins) #store probabilities
-		tot_area=RintegralHR(b=b, sigma=sigma, 0, Xmax, point=point)
-		for(i in 1:nbins){
-			p[i]=RintegralHR(b=b, sigma=sigma, breaks[i], breaks[i+1], point=point)/tot_area
-		}
-		# #multinomial log-likelihood for the observed bin counts
-		LL=dmulti(x=xtots, size=nind, prob=p, log=TRUE)
-		#hack to deal with really small likelihood values
-		if(LL==-Inf){LL<- -1000}
-		if(log){ return(LL) } else return(exp(LL))
+		return(xrand)
 	}
 )
+
+

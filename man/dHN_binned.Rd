@@ -29,7 +29,7 @@ models.
 
 #direct invocation of functions from R to evaluate the likelihood
 dHN_binned(x=20,  sigma=40, breaks=seq(0, 100, by=25), Xmax=100)
-
+dHN_binned_V(x=c(20, 21, 41, 66),  sigma=40, breaks=seq(0, 100, by=25), Xmax=100)
 N=1000
 true_y<-runif(N, 0, 100)
 #hazard rate truth
@@ -43,7 +43,7 @@ y<-true_y[detect==1]
 nind<-length(y)
 hist(y, breaks=20)
 distCodeV<-nimbleCode({
- y[1:nind]~dHN_binned_V(sigma, 100, breaks=seq(0, 100, by=20))
+ y[1:nind]~dHN_binned_V(sigma, 100, breaks=br[1:6])
  sigma~dunif(10, 70)
  })
 #inits and monitors
@@ -53,7 +53,7 @@ params <- c("sigma")
 #generate some MCMC samples
 samples <- nimbleMCMC(
 code = distCodeV,
-constants = list(y=y, nind=nind), ## the distance data
+constants = list(y=y, nind=nind, br=seq(0, 100, by=20)), ## the distance data
 inits = inits,
 monitors = params,
 niter = 2000,
