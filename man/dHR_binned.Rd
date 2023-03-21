@@ -39,7 +39,6 @@ distribution for binned data that can be used directly from R or in \code{nimble
 models.
 }
 \examples{
-
 #direct invocation of functions from R to evaluate likelihoods
 dHR_binned_V(x=c(20, 21, 41), b=1, sigma=40, Xmax=100, breaks=seq(0, 100, by=20))
 
@@ -111,3 +110,5 @@ title(main="Red=truth, Blue=posterior mean, Grey=samples")
 \author{
 Michael Scroggie
 }
+\keyword{half}
+\keyword{normal.}

@@ -1,6 +1,6 @@
 Package: nimbleDistance
 Title: Functions to Fit Bayesian distance sampling models using nimble
-Version: 0.0.2
+Version: 0.0.5
 Date: 2020-01-12
 Authors@R: 
     c(person(given = "Michael",
@@ -8,6 +8,9 @@ Authors@R:
              role = c("aut", "cre"),
              email = "scrogster@gmail.com",
              comment = c(ORCID = "0000-0001-9441-6565")),
+     person(given = "David",
+             family = "Ramsey",
+             role =   "aut"),  
       person(given = "David",
              family = "Miller",
              role = "ctb",

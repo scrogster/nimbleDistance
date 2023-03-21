@@ -22,10 +22,10 @@
 								 range = c(0, Inf))))
 
 	registerDistributions(list(
-		dHN_V = list(BUGSdist="dHN_V(sigma, Xmax, point, breaks)",
+		dHN_V = list(BUGSdist="dHN_V(sigma, Xmax, point)",
 								 pqAvail = FALSE,
 								 types = c('value = double(1)', 'sigma = double(0)',
-								 					'Xmax = double(0)', 'point = double(0)', 'breaks=double(1)'),
+								 					'Xmax = double(0)', 'point = double(0)'),
 								 range = c(0, Inf))))
 	#Hazard-rate binned-----------------------------------------------------
 	registerDistributions(list(

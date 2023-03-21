@@ -18,8 +18,9 @@
 #' @param log if TRUE, return the log-likelihood
 #'
 #' @author Michael Scroggie
-#' @examples
 #'
+#' @keywords half normal.
+#' @examples
 #' #direct invocation of functions from R to evaluate likelihoods
 #' dHR_binned_V(x=c(20, 21, 41), b=1, sigma=40, Xmax=100, breaks=seq(0, 100, by=20))
 #'
