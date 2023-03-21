@@ -1,7 +1,8 @@
 # This file registers all distributions when the package is loaded.
 .onAttach <- function(libname, pkgname) {
 
-	packageStartupMessage("Registering user-defined distributions:\n ")
+	packageStartupMessage("Registering user-defined distributions:\n
+												dHR, dHN, dHR_binned, dHN_binned")
 	#Hazard-rate-----------------------------------------------------------
 	registerDistributions(list(
 		dHR = list(BUGSdist="dHR(b, sigma, Xmax, point)",
@@ -29,19 +30,21 @@
 	#Hazard-rate binned-----------------------------------------------------
 	registerDistributions(list(
 		dHR_binned_V = list(
-			BUGSdist = "dHR_binned_V(b, sigma, Xmax, point, breaks)",
+			BUGSdist = "dHR_binned_V(b, sigma, Xmax,  point, breaks)",
 			types = c('value = double(1)', 'b = double(0)', 'sigma = double(0)',
-								'Xmax = double(0)', 'breaks=double(1)', 'point=double(0)'),
+								'Xmax = double(0)', 'point=double(0)', 'breaks=double(1)'),
 			pqAvail = FALSE,
 			range = c(0, Inf))
 	))
 
-
-
 	registerDistributions(list(
-		dHR_binned = list(BUGSdist="dHR_binned(b, sigma, Xmax, point, breaks)",
-							 pqAvail = FALSE,
-							 range = c(0, Inf))))
+		dHR_binned = list(
+			BUGSdist = "dHR_binned(b, sigma, Xmax,  point, breaks)",
+			types = c('value = double(0)', 'b = double(0)', 'sigma = double(0)',
+								'Xmax = double(0)', 'point=double(0)', 'breaks=double(1)'),
+			pqAvail = FALSE,
+			range = c(0, Inf))
+	))
 
 	#Half normal binned-----------------------------------------------------
 	registerDistributions(list(
@@ -55,10 +58,5 @@
 			pqAvail = FALSE,
 			range = c(0, Inf))
 	))
-
-	registerDistributions(list(
-		dHN_binned = list(BUGSdist="dHN_binned(sigma, Xmax, breaks)",
-											pqAvail = FALSE,
-											range = c(0, Inf))))
 
 }

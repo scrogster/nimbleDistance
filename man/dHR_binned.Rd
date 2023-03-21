@@ -3,83 +3,110 @@
 \name{dHR_binned}
 \alias{dHR_binned}
 \alias{dHR_binned_V}
+\alias{rHR_binned_V}
+\alias{rHR_binned}
 \title{Hazard rate distribution for use in \code{nimble} models}
 \usage{
-dHR_binned_V(x, sigma, b, Xmax = 100, breaks, point = 0, log = 0)
+dHR_binned_V(x, b, sigma, Xmax = 100, point = 0, breaks, log = 0)
 
-dHR_binned(x, sigma, b, Xmax = 100, breaks, point, log = 0)
+rHR_binned_V(n, b, sigma, Xmax = 100, point = 0, breaks)
+
+dHR_binned(x, b, sigma, Xmax = 100, point = 0, breaks, log = 0)
+
+rHR_binned(n, b, sigma, Xmax = 100, point = 0, breaks)
 }
 \arguments{
 \item{x}{distance data. either a single value (dHR) or a vector of values (dHR_V). As data are binned these
-can be any value within the bounds of each bin (e.g. a midpoint).}
-
-\item{sigma}{scale of the hazard rate function}
+can be any values within the bounds of each bin (e.g. a midpoint).}
 
 \item{b}{shape of the hazard rate function}
 
+\item{sigma}{scale of the hazard rate function}
+
 \item{Xmax}{right truncation distance for integration of the likelihood function}
 
-\item{breaks}{vector of break points for binning. Typically between zero and Xmax.}
-
 \item{point}{logical value indicating that point surveys were used rather than line-transects. Defaults to zero.}
+
+\item{breaks}{vector of break points for binning. Typically between zero and Xmax.}
 
 \item{log}{if TRUE, return the log-likelihood}
 
 \item{Xmin}{left truncation distance for integration of the likelihood function}
 }
 \description{
-\code{dHR_binned} and \code{dHR_binned_V} provide hazard-rate detection
-distributions for binned data that can be used directly from R or in \code{nimble}
+\code{dHR_binned_V} provides a hazard-rate detection
+distribution for binned data that can be used directly from R or in \code{nimble}
 models.
 }
 \examples{
 
 #direct invocation of functions from R to evaluate likelihoods
-dHR_binned(x=20, b=1, sigma=40, breaks=seq(0, 100, by=20), Xmax=100, point=0)
-dHR_binned_V(x=c(20, 21, 41), b=1, sigma=40, breaks=seq(0, 100, by=20), Xmax=100, point=0)
+dHR_binned_V(x=c(20, 21, 41), b=1, sigma=40, Xmax=100, breaks=seq(0, 100, by=20))
 
 N=500
 true_y<-runif(N, 0, 100)
-#hazard rate truth
 sigma_true<-40
 b_true<- 5
 #detection
 p_detect<- 1-exp(-(true_y/sigma_true)^(-b_true))
 plot(p_detect~true_y, type="p")
 detect<-rbinom(N, 1, p_detect)
-#observations
 y<-true_y[detect==1]
 rug(y, side=1)
 nind<-length(y)
 hist(y, breaks=20)
 
 distCode_binned<-nimbleCode({
- y[1:nind]~dHR_binned_V(b, sigma, 100, breaks=br[1:6], point=0)
- sigma~dunif(10, 70)
- b~dunif(2, 20)
- p_mean<-RintegralHR(b, sigma, 0, 100, point=0)/100
- })
+y[1:nind]~dHR_binned_V(b=b, sigma=sigma, Xmax=100, point=0, breaks=br[1:6])
+sigma~dunif(10, 70)
+b~dunif(2, 20)
+})
 #inits and monitors
 inits <- function() list(sigma=50, b=5)
-params <- c("sigma", "b", "p_mean")
+params <- c("sigma", "b")
 
 #generate some MCMC samples
 samples <- nimbleMCMC(
 code = distCode_binned,
-constants = list(y=y, nind=nind, br=seq(0, 100, by=20)), ## the distance data
+data=list(y=y, br=seq(0, 100, by=20)),
+constants = list( nind=nind),
 inits = inits,
 monitors = params,
-niter = 1000,
-nburnin = 500)
+niter = 5000,
+nburnin = 0)
 
-layout(matrix(1:3, nrow=3))
-hist(samples[,"sigma"], col="red", xlab="sigma")
-abline(v=sigma_true, col="blue", lwd=2)
-hist(samples[,"b"], col="red", xlab="b")
-abline(v=b_true, col="blue", lwd=2)
-hist(y, freq=FALSE)
-lines(x=1:100, y=dHR(1:100, mean(samples[,"b"])), mean(samples[,"sigma"])), col="red")
-#' @rdname dHR_binned
+plot(samples[,"sigma"]~samples[,"b"], type="o", cex=0.5, pch=16, col="#33333333",
+	 ylab="sigma", xlab="b")
+points(x=mean(samples[,"b"]), y=mean(samples[,"sigma"]), pch=16, col="green")
+points(x=b_true, y=sigma_true, col="red", pch=16)
+title(main="Red=truth, Green=posterior mean, Grey=samples")
+
+#Fitting the same model one distance at a time using dHR_binned - very slow.
+distCode_binned_scalar<-nimbleCode({
+for(i in 1:nind){
+y[i]~dHR_binned(b=b, sigma=sigma, Xmax=100, point=0, breaks=br[])
+}
+sigma~dunif(10, 70)
+b~dunif(2, 20)
+})
+#inits and monitors
+inits <- function() list(sigma=50, b=5)
+params <- c("sigma", "b")
+
+#generate some MCMC samples
+samples <- nimbleMCMC(
+code = distCode_binned_scalar,
+data=list(y=y, br=seq(0, 100, by=20)),
+constants = list(nind=nind),
+inits = inits,
+monitors = params,
+niter = 500,
+nburnin = 50)
+plot(samples[,"sigma"]~samples[,"b"], type="p", cex=0.5, pch=16, col="#33333333")
+points(x=mean(samples[,"b"]), y=mean(samples[,"sigma"]), pch=16, col="blue")
+points(x=b_true, y=sigma_true, col="red", pch=16)
+title(main="Red=truth, Blue=posterior mean, Grey=samples")
+
 }
 \author{
 Michael Scroggie
