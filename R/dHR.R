@@ -150,7 +150,7 @@ rHR_V<- nimbleFunction(
 								 sigma = double(0),
 								 Xmax  = double(0, default=100),
 								 point = logical(0, default = 0)) {
-		returnType(double(0))
+		returnType(double(1))
 		k<-0
 		while(k==0){
 			xrand<-runif(1, 0, Xmax)
