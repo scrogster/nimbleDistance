@@ -29,7 +29,7 @@
 #'#hazard rate truth
 #'sigma_true<-40
 #'#half-normal detection
-#'p_detect<- exp(-true_y^2/sigma_true^2)
+#'p_detect<- exp(-true_y^2/(2*sigma_true^2))
 #'plot(p_detect~true_y, type="p")
 #'detect<-rbinom(N, 1, p_detect)
 #'#observations
@@ -68,14 +68,14 @@ dHN <- nimbleFunction(
 								 log = double(0, default = 0)) {
 		returnType(double(0))
 		#line transect likelihood
-		if(point==0) {integral=pnorm(Xmax, 0, sigma)-0.5
-		              g = dnorm(x, 0, sigma)
-		              L=g/integral} else
-		#point transect likelihood
-		if(point==1) {integral <- sigma^2 * (1 - exp(-(Xmax^2)/(2*sigma^2)))
-		             g <- exp(-(x^2)/(2*sigma^2))
-		             L <- (x * g)/integral }
-		LL<-log(L)
+		if(point==0) {
+			integral <- 2*(pnorm(Xmax, 0, sigma)-0.5) * sqrt(pi/2) * sigma
+			g = exp(-x^2/(2*sigma^2))
+			L=g/integral} else
+				#point transect likelihood (borrowed from Dave Miller)
+				if(point==1) {integral <- sigma^2 * (1 - exp(-(Xmax^2)/(2*sigma^2)))
+				g <- exp(-(x^2)/(2*sigma^2))
+				L <- (x * g)/integral }
 		if(log) return(LL)
 		else return(L)
 	}
@@ -112,14 +112,15 @@ dHN_V <- nimbleFunction(
 								 point = double(0, default=0),
 								 log = double(0, default = 0)) {
 		returnType(double(0))
-		#line transect likelihood
-		if(point==0) {integral <- 2*(pnorm(Xmax, 0, sigma)-0.5) * sqrt(pi/2) * sigma
-		g = exp(-x^2/(2*sigma^2))
-		L=g/integral} else
-			#point transect likelihood
-			if(point==1) {integral <- sigma^2 * (1 - exp(-(Xmax^2)/(2*sigma^2)))
-			g <- exp(-(x^2)/(2*sigma^2))
-			L <- (x * g)/integral }
+		if(point==0) {
+			integral <- 2*(pnorm(Xmax, 0, sigma)-0.5) * sqrt(pi/2) * sigma
+			g = exp(-x^2/(2*sigma^2))
+			L=g/integral} else
+				#point transect likelihood (borrowed from Dave Miller)
+				if(point==1) {integral <- sigma^2 * (1 - exp(-(Xmax^2)/(2*sigma^2)))
+				g <- exp(-(x^2)/(2*sigma^2))
+				L <- (x * g)/integral }
+		LL<-sum(log(L))
 		LL<-sum(log(L))
 		if(log) return(LL)
 		else return(exp(LL))
