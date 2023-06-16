@@ -3,11 +3,17 @@
 \name{dHN_binned}
 \alias{dHN_binned}
 \alias{dHN_binned_V}
+\alias{rHN_binned}
+\alias{rHN_binned_V}
 \title{Half-normal distribution for use in \code{nimble} models}
 \usage{
+dHN_binned(x, sigma, Xmax = 100, breaks, log = 0)
+
+rHN_binned(n, sigma, Xmax = 100, breaks)
+
 dHN_binned_V(x, sigma, Xmax = 100, breaks, log = 0)
 
-dHN_binned(x, sigma, Xmax = 100, breaks, log = 0)
+rHN_binned_V(n, sigma, Xmax = 100, breaks)
 }
 \arguments{
 \item{x}{distance observations. either a single value (dHN_binned) or a vector of values (dHN_binned_V)}
@@ -16,36 +22,36 @@ dHN_binned(x, sigma, Xmax = 100, breaks, log = 0)
 
 \item{Xmax}{right truncation distance for integration of the likelihood function}
 
-\item{log}{if TRUE, return the log-likelihood}
+\item{breaks}{vector of breakpoints for binning the data}
 
-\item{Xmin}{left truncation distance for integration of the likelihood function}
+\item{log}{if TRUE, return the log-likelihood}
 }
 \description{
-\code{dHN_binned} and \code{dHN_binned_V} provide half-normal detection
-distributions that can be used directly from R or in \code{nimble}
+\code{dHN_binned_V} provide a half-normal detection
+distribution that can be used directly from R or in \code{nimble}
 models.
 }
 \examples{
-
 #direct invocation of functions from R to evaluate the likelihood
-dHN_binned(x=20,  sigma=40, breaks=seq(0, 100, by=25), Xmax=100)
 dHN_binned_V(x=c(20, 21, 41, 66),  sigma=40, breaks=seq(0, 100, by=25), Xmax=100)
 N=1000
 true_y<-runif(N, 0, 100)
-#hazard rate truth
+#half normal truth
 sigma_true<-40
+Xmax=60
 #half-normal detection
-p_detect<- exp(-true_y^2/sigma_true^2)
+p_detect<- exp(-true_y^2/2*(sigma_true^2))
 plot(p_detect~true_y, type="p")
 detect<-rbinom(N, 1, p_detect)
 #observations
-y<-true_y[detect==1]
+y<-true_y[detect==1 & true_y<Xmax]
 nind<-length(y)
 hist(y, breaks=20)
 distCodeV<-nimbleCode({
- y[1:nind]~dHN_binned_V(sigma, 100, breaks=br[1:6])
+ y[1:nind]~dHN_V(sigma, Xmax=100, point=0)
  sigma~dunif(10, 70)
  })
+
 #inits and monitors
 inits <- function() list(sigma=50)
 params <- c("sigma")
@@ -53,20 +59,19 @@ params <- c("sigma")
 #generate some MCMC samples
 samples <- nimbleMCMC(
 code = distCodeV,
-constants = list(y=y, nind=nind, br=seq(0, 100, by=20)), ## the distance data
+data=list(y=y, br=seq(0, 100, by=20)),
+constants = list(nind=nind),
 inits = inits,
 monitors = params,
-niter = 2000,
-nburnin = 1000)
+niter = 5000,
+nburnin = 0)
 
-layout(matrix(1:2, nrow=2))
-hist(y, freq=FALSE)
-lines(x=1:100, y=dHN(1:100, mean(samples[,"sigma"])), col="red")
-hist(samples[,"sigma"], col="red")
+plot(samples[,"sigma"], col="red", type="l")
+abline(h=sigma_true)
 
 }
 \author{
 Michael Scroggie
 }
-\keyword{hazard}
-\keyword{rate}
+\keyword{half}
+\keyword{normal.}

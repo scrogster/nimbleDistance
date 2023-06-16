@@ -57,4 +57,16 @@
 			range = c(0, Inf))
 	))
 
+	registerDistributions(list(
+		dHN_binned = list(
+			BUGSdist = "dHN_binned(sigma, Xmax, breaks)",
+			types = c('value=double(0)',
+								'sigma=double(0)',
+								'b=double(0)',
+								'Xmax = double(0)',
+								'breaks = double(1)'),
+			pqAvail = FALSE,
+			range = c(0, Inf))
+	))
+
 }
