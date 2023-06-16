@@ -2,11 +2,16 @@
 title: "Bayesian analysis of distance sampling data using the nimbleDistance package"
 author: "Michael Scroggie"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    fig_width: 5
+    fig_height: 3.5
+    number_sections: false
+    toc: false
 vignette: >
   %\VignetteIndexEntry{Bayesian analysis of distance sampling data using the nimbleDistance package}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  \usepackage[utf8]{inputenc}
 ---
 
 ```{r setup, include = FALSE}
