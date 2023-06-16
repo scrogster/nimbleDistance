@@ -14,8 +14,8 @@
 #' @param Xmax right truncation distance for integration of the likelihood function
 #' @param breaks vector of break points for binning. Typically between zero and Xmax.
 #' @param point logical value indicating that point surveys were used rather than line-transects. Defaults to zero.
-#' @param Xmin left truncation distance for integration of the likelihood function
 #' @param log if TRUE, return the log-likelihood
+#' @param n   number of random values to generate
 #'
 #' @author Michael Scroggie
 #'

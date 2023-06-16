@@ -16,6 +16,7 @@
 #' @param point logical value indicating that point surveys were used rather than line-transects. Defaults to zero.
 #' @param Xmin left truncation distance for integration of the likelihood function
 #' @param log if TRUE, return the log-likelihood
+#' @param n   number of random values to generate
 #'
 #' @author Michael Scroggie
 #'
@@ -59,13 +60,11 @@
 #'	niter = 1000,
 #'	nburnin = 500)
 #'
-#'layout(matrix(1:3, nrow=3))
 #'hist(samples[,"sigma"], col="red", xlab="sigma")
 #'abline(v=sigma_true, col="blue", lwd=2)
 #'hist(samples[,"b"], col="red", xlab="b")
 #'abline(v=b_true, col="blue", lwd=2)
 #'hist(y, freq=FALSE)
-#'lines(x=1:100, y=dHR(1:100, mean(samples[,"b"])), mean(samples[,"sigma"])), col="red")
 
 #helper functions for computing the integrals of the Hazard Rate distance function
 #' @export
@@ -151,13 +150,17 @@ rHR_V<- nimbleFunction(
 								 Xmax  = double(0, default=100),
 								 point = logical(0, default = 0)) {
 		returnType(double(1))
+		out<-numeric(n)
+		for(i in 1:n) {
 		k<-0
 		while(k==0){
 			xrand<-runif(1, 0, Xmax)
 			p <- 1-exp(-(xrand/sigma)^(-b))
 			k=rbinom(1, 1, p)
 		}
-		return(xrand)
+		out[i]<-xrand
+		}
+		return(out)
 	}
 )
 

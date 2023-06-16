@@ -12,6 +12,7 @@
 #' @param Xmax right truncation distance for integration of the likelihood function
 #' @param breaks vector of breakpoints for binning the data
 #' @param log if TRUE, return the log-likelihood
+#' @param n   number of random values to generate
 #'
 #' @author Michael Scroggie
 #'
@@ -25,7 +26,7 @@
 #'sigma_true<-40
 #'Xmax=60
 #'#half-normal detection
-#'p_detect<- exp(-true_y^2/2*(sigma_true^2))
+#'p_detect<- exp(-true_y^2/(2*sigma_true^2))
 #'plot(p_detect~true_y, type="p")
 #'detect<-rbinom(N, 1, p_detect)
 #'#observations

@@ -31,7 +31,7 @@ can be any values within the bounds of each bin (e.g. a midpoint).}
 
 \item{log}{if TRUE, return the log-likelihood}
 
-\item{Xmin}{left truncation distance for integration of the likelihood function}
+\item{n}{number of random values to generate}
 }
 \description{
 \code{dHR_binned_V} provides a hazard-rate detection

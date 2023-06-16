@@ -26,7 +26,7 @@ rHN_V(n, sigma, Xmax = 100, point = 0)
 
 \item{log}{if TRUE, return the log-likelihood}
 
-\item{Xmin}{left truncation distance for integration of the likelihood function}
+\item{n}{number of random values to generate}
 }
 \description{
 \code{dHN} and \code{dHN_V} provide half-normal detection

@@ -25,6 +25,8 @@ rHN_binned_V(n, sigma, Xmax = 100, breaks)
 \item{breaks}{vector of breakpoints for binning the data}
 
 \item{log}{if TRUE, return the log-likelihood}
+
+\item{n}{number of random values to generate}
 }
 \description{
 \code{dHN_binned_V} provide a half-normal detection
@@ -40,7 +42,7 @@ true_y<-runif(N, 0, 100)
 sigma_true<-40
 Xmax=60
 #half-normal detection
-p_detect<- exp(-true_y^2/2*(sigma_true^2))
+p_detect<- exp(-true_y^2/(2*sigma_true^2))
 plot(p_detect~true_y, type="p")
 detect<-rbinom(N, 1, p_detect)
 #observations

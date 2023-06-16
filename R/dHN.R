@@ -11,9 +11,9 @@
 #' @param x distance observations. either a single value (dHN) or a vector of values (dHN_V)
 #' @param sigma scale of the half-normal distribution
 #' @param Xmax right truncation distance for integration of the likelihood function
-#' @param Xmin left truncation distance for integration of the likelihood function
 #' @param point logical, if 1 compute likelihood for point transects, if 0 (default) compute likelihood for line transects
 #' @param log if TRUE, return the log-likelihood
+#' @param n   number of random values to generate
 #'
 #' @author Michael Scroggie
 #'

@@ -32,6 +32,8 @@ rHR_V(n, b, sigma, Xmax = 100, point = 0)
 \item{x}{distance data. either a single value (dHR) or a vector of values (dHR_V)}
 
 \item{log}{if TRUE, return the log-likelihood}
+
+\item{n}{number of random values to generate}
 }
 \description{
 \code{dHR} and \code{dHR_V} provide hazard-rate detection
@@ -79,13 +81,11 @@ monitors = params,
 niter = 1000,
 nburnin = 500)
 
-layout(matrix(1:3, nrow=3))
 hist(samples[,"sigma"], col="red", xlab="sigma")
 abline(v=sigma_true, col="blue", lwd=2)
 hist(samples[,"b"], col="red", xlab="b")
 abline(v=b_true, col="blue", lwd=2)
 hist(y, freq=FALSE)
-lines(x=1:100, y=dHR(1:100, mean(samples[,"b"])), mean(samples[,"sigma"])), col="red")
 }
 \author{
 Michael Scroggie
