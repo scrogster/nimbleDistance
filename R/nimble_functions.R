@@ -1,8 +1,6 @@
 # This file registers all distributions when the package is loaded.
 .onAttach <- function(libname, pkgname) {
 
-	packageStartupMessage("Registering user-defined distributions:\n
-												dHR, dHN, dHR_binned, dHN_binned")
 	#Hazard-rate-----------------------------------------------------------
 	registerDistributions(list(
 		dHR = list(BUGSdist="dHR(b, sigma, Xmax, point)",
