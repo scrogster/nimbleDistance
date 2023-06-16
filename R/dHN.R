@@ -113,13 +113,13 @@ dHN_V <- nimbleFunction(
 								 log = double(0, default = 0)) {
 		returnType(double(0))
 		#line transect likelihood
-		if(point==0) {integral=pnorm(Xmax, 0, sigma)-0.5
-		              g = dnorm(x, 0, sigma)
-		              L=g/integral} else
+		if(point==0) {integral <- 2*(pnorm(Xmax, 0, sigma)-0.5) * sqrt(pi/2) * sigma
+		g = exp(-x^2/(2*sigma^2))
+		L=g/integral} else
 			#point transect likelihood
 			if(point==1) {integral <- sigma^2 * (1 - exp(-(Xmax^2)/(2*sigma^2)))
-			              g <- exp(-(x^2)/(2*sigma^2))
-			              L <- (x * g)/integral }
+			g <- exp(-(x^2)/(2*sigma^2))
+			L <- (x * g)/integral }
 		LL<-sum(log(L))
 		if(log) return(LL)
 		else return(exp(LL))
