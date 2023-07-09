@@ -76,10 +76,11 @@ dHN <- nimbleFunction(
 				if(point==1) {integral <- sigma^2 * (1 - exp(-(Xmax^2)/(2*sigma^2)))
 				g <- exp(-(x^2)/(2*sigma^2))
 				L <- (x * g)/integral }
-		LL<-log(L) 
+		LL<-log(L)
 		if(log) return(LL)
 		else return(L)
-	}
+	},
+	buildDerivs=TRUE
 )
 
 #' @rdname dHN
@@ -125,7 +126,8 @@ dHN_V <- nimbleFunction(
 		LL<-sum(log(L))
 		if(log) return(LL)
 		else return(exp(LL))
-	}
+	},
+	buildDerivs=TRUE
 )
 
 #' @rdname dHN
