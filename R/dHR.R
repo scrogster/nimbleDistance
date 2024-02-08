@@ -97,7 +97,7 @@ dHR <- nimbleFunction(
 		if(log) return(LL)
 		else return(L)
 	},
-	buildDerivs=TRUE
+	buildDerivs=FALSE
 )
 
 #' @rdname dHR
@@ -141,7 +141,7 @@ dHR_V <- nimbleFunction(
 		if(log) return(LL)
 		else return(exp(LL))
 	},
-	buildDerivs=TRUE
+	buildDerivs=FALSE
 )
 #' @rdname dHR
 #' @export

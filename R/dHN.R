@@ -79,8 +79,7 @@ dHN <- nimbleFunction(
 		LL<-log(L)
 		if(log) return(LL)
 		else return(L)
-	},
-	buildDerivs=TRUE
+	}
 )
 
 #' @rdname dHN
@@ -126,8 +125,7 @@ dHN_V <- nimbleFunction(
 		LL<-sum(log(L))
 		if(log) return(LL)
 		else return(exp(LL))
-	},
-	buildDerivs=TRUE
+	}
 )
 
 #' @rdname dHN
