@@ -13,5 +13,5 @@ The package is at a very early stage of development. Suggestions for improvement
 ### Installation:
 
 ```
-devtools::install_github("scrogster/nimbleDistance", build_vignettes = TRUE, INSTALL_opts = "--no-multiarch")
+remotes::install_github("scrogster/nimbleDistance")
 ```
